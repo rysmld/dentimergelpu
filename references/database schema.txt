@@ -1,0 +1,350 @@
+-- user login and profile table
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_number VARCHAR(20) UNIQUE NOT NULL, -- Used for login
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('Admin', 'Clinician', 'Clinical Instructor') NOT NULL,
+    contact_number VARCHAR(20),
+    profile_picture VARCHAR(255), -- Store image URL or file path
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- test 
+INSERT INTO users (student_number, first_name, last_name, password, role, contact_number, profile_picture) VALUES
+('20240001', 'John', 'Doe', 'admin123', 'Admin', '09123456789', NULL),
+('20240002', 'Jane', 'Smith', 'clinician123', 'Clinician', '09234567890', NULL),
+('20240003', 'Alice', 'Brown', 'instructor123', 'Clinical Instructor', '09345678901', NULL);
+
+--patients table
+CREATE DATABASE IF NOT EXISTS patient_management;
+USE patient_management;
+
+CREATE TABLE patients (
+    patient_number INT(8) UNSIGNED AUTO_INCREMENT PRIMARY KEY, -- Remove ZEROFILL, as it's deprecated
+    last_name VARCHAR(50) NOT NULL,
+    first_name VARCHAR(50) NOT NULL,
+    middle_initial VARCHAR(2),
+    nickname VARCHAR(50),
+    age INT(3),
+    sex_gender ENUM('Male', 'Female', 'Other') NOT NULL,
+    date_of_birth DATE NOT NULL,
+    civil_status ENUM('Single', 'Married', 'Divorced', 'Widowed', 'Separated', 'Other'),
+    nationality_ethnicity VARCHAR(50),
+    home_address VARCHAR(255) NOT NULL,
+    home_phone VARCHAR(15),
+    mobile_no VARCHAR(15) NOT NULL,
+    email VARCHAR(100),
+    occupation VARCHAR(100),
+    work_address VARCHAR(255),
+    work_phone VARCHAR(15),
+    parent_guardian VARCHAR(100),
+    parent_contact_number VARCHAR(15),
+    emergency_contact VARCHAR(100) NOT NULL,
+    emergency_contact_number VARCHAR(15) NOT NULL,
+    profile_photo LONGBLOB,
+    thumbmark LONGBLOB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) AUTO_INCREMENT = 20250001; -- ✅ Set initial value
+
+
+--test patients 
+INSERT INTO patients (
+    patient_number, last_name, first_name, middle_initial, nickname, age, sex_gender, date_of_birth,
+    civil_status, nationality_ethnicity, home_address, home_phone, mobile_no, email, occupation,
+    work_address, work_phone, parent_guardian, parent_contact_number, emergency_contact,
+    emergency_contact_number, profile_photo, thumbmark
+) VALUES 
+(
+    '000001', 'Doe', 'John', 'A', 'Johnny', 15, 'Male', '2008-05-15', 'Single', 'American',
+    '123 Main St, Springfield', '123-456-7890', '987-654-3210', 'john.doe@example.com', 'Student',
+    NULL, NULL, 'Jane Doe', '555-123-4567', 'Jane Doe', '555-123-4567', NULL, NULL
+),
+(
+    '000002', 'Smith', 'Jane', 'B', NULL, 25, 'Female', '1998-10-22', 'Single', 'Canadian',
+    '456 Elm St, Toronto', '111-222-3333', '444-555-6666', 'jane.smith@example.com', 'Engineer',
+    '789 Work St, Toronto', '777-888-9999', NULL, NULL, 'John Smith', '555-987-6543', NULL, NULL
+),
+(
+  'Brown', 'Alice', 'C', 'Ali', 16, 'Female', '2007-03-10', 'Single', 'British',
+    '789 Oak St, London', '222-333-4444', '555-666-7777', 'alice.brown@example.com', 'Student',
+    NULL, NULL, 'Bob Brown', '555-111-2222', 'Bob Brown', '555-111-2222', NULL, NULL
+);
+
+INSERT INTO patients (
+    last_name, first_name, middle_initial, nickname, age, sex_gender, date_of_birth,
+    civil_status, nationality_ethnicity, home_address, home_phone, mobile_no, email, occupation,
+    work_address, work_phone, parent_guardian, parent_contact_number, emergency_contact,
+    emergency_contact_number, profile_photo, thumbmark
+) VALUES 
+(
+  'Brown', 'Alice', 'C', 'Ali', 16, 'Female', '2007-03-10', 'Single', 'British',
+    '789 Oak St, London', '222-333-4444', '555-666-7777', 'alice.brown@example.com', 'Student',
+    NULL, NULL, 'Bob Brown', '555-111-2222', 'Bob Brown', '555-111-2222', NULL, NULL
+);
+
+
+-- subjectiveform
+CREATE TABLE cases (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    patient_number INT(8) UNSIGNED NOT NULL,
+    date_today DATE NOT NULL,
+    clinician_id INT NOT NULL,
+    clinical_instructor_id INT NOT NULL,
+    clinic_name VARCHAR(100),
+    chief_complaint TEXT,
+    history_of_present_illness TEXT,
+    female_options VARCHAR(50),
+    contraceptives VARCHAR(50),
+    dental_history TEXT,
+    family_history TEXT,
+    personal_social_history TEXT,
+    status
+    FOREIGN KEY (patient_number) REFERENCES patients(patient_number) ON DELETE CASCADE,
+    FOREIGN KEY (clinician_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (clinical_instructor_id) REFERENCES users(id) ON DELETE CASCADE
+) AUTO_INCREMENT = 20251001;
+
+
+-- medical history
+CREATE TABLE medical_history (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    patient_number INT(8) UNSIGNED NOT NULL,
+    medications TEXT,
+    allergies TEXT,
+    past_illness TEXT,
+    last_exam DATE,
+    hospitalization TEXT,
+    bleeding_tendencies TEXT,
+    FOREIGN KEY (patient_number) REFERENCES patients(patient_number) ON DELETE CASCADE
+);
+
+-- review of systems
+CREATE TABLE review_of_systems (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    patient_number INT(8) UNSIGNED NOT NULL,
+    skin TEXT,
+    extremities TEXT,
+    eyes TEXT,
+    ent TEXT,
+    respiratory TEXT,
+    cardiovascular TEXT,
+    gastrointestinal TEXT,
+    genitourinary TEXT,
+    endocrine TEXT,
+    hematopoietic TEXT,
+    neurological TEXT,
+    psychiatric TEXT,
+    growth_tumor TEXT,
+    FOREIGN KEY (patient_number) REFERENCES patients(patient_number) ON DELETE CASCADE
+);
+
+-- healthassessment
+CREATE TABLE health_assessment (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    patient_number INT(8) UNSIGNED NOT NULL,
+    asa VARCHAR(10),
+    notes TEXT,
+    FOREIGN KEY (patient_number) REFERENCES patients(patient_number) ON DELETE CASCADE
+);
+
+-- healthquestionnaire
+CREATE TABLE health_questionnaire (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    patient_number INT(8) UNSIGNED NOT NULL,
+    last_physical DATE,
+    under_care ENUM('Yes', 'No') DEFAULT 'No',
+    under_care_details TEXT,
+    serious_illness ENUM('Yes', 'No') DEFAULT 'No',
+    serious_illness_details TEXT,
+    hospitalized ENUM('Yes', 'No') DEFAULT 'No',
+    hospitalized_details TEXT,
+    abnormal_bleeding ENUM('Yes', 'No') DEFAULT 'No',
+    bruising ENUM('Yes', 'No') DEFAULT 'No',
+    blood_transfusion ENUM('Yes', 'No') DEFAULT 'No',
+    blood_transfusion_details TEXT,
+    blood_disorder ENUM('Yes', 'No') DEFAULT 'No',
+    tumor_surgery ENUM('Yes', 'No') DEFAULT 'No',
+    medications TEXT,
+    medications_details TEXT,
+    dental_trouble ENUM('Yes', 'No') DEFAULT 'No',
+    dental_trouble_details TEXT,
+    unlisted_disease TEXT,
+    radiation_exposure ENUM('Yes', 'No') DEFAULT 'No',
+    glasses ENUM('Yes', 'No') DEFAULT 'No',
+    FOREIGN KEY (patient_number) REFERENCES patients(patient_number) ON DELETE CASCADE
+);
+
+-- health questionnaire diseases
+CREATE TABLE health_questionnaire_diseases (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    patient_number INT(8) UNSIGNED NOT NULL,
+    rheumatic_fever ENUM('Yes', 'No') DEFAULT 'No',
+    heart_abnormalities ENUM('Yes', 'No') DEFAULT 'No',
+    cardiovascular_disease ENUM('Yes', 'No') DEFAULT 'No',
+    childhood_diseases TEXT,
+    childhood_diseases_details TEXT,
+    asthma ENUM('Yes', 'No') DEFAULT 'No',
+    hives ENUM('Yes', 'No') DEFAULT 'No',
+    fainting ENUM('Yes', 'No') DEFAULT 'No',
+    diabetes ENUM('Yes', 'No') DEFAULT 'No',
+    frequent_urination ENUM('Yes', 'No') DEFAULT 'No',
+    dry_mouth ENUM('Yes', 'No') DEFAULT 'No',
+    hepatitis ENUM('Yes', 'No') DEFAULT 'No',
+    arthritis ENUM('Yes', 'No') DEFAULT 'No',
+    stomach_ulcers ENUM('Yes', 'No') DEFAULT 'No',
+    kidney_trouble ENUM('Yes', 'No') DEFAULT 'No',
+    tuberculosis ENUM('Yes', 'No') DEFAULT 'No',
+    venereal_disease ENUM('Yes', 'No') DEFAULT 'No',
+    other_conditions TEXT,
+    FOREIGN KEY (patient_number) REFERENCES patients(patient_number) ON DELETE CASCADE
+);
+
+-- health questionnaire diseases
+CREATE TABLE health_questionnaire_allergies (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    patient_number INT(8) UNSIGNED NOT NULL,
+    local_anesthetics ENUM('Yes', 'No') DEFAULT 'No',
+    penicillin ENUM('Yes', 'No') DEFAULT 'No',
+    aspirin ENUM('Yes', 'No') DEFAULT 'No',
+    latex_gloves ENUM('Yes', 'No') DEFAULT 'No',
+    other_allergies TEXT,
+    FOREIGN KEY (patient_number) REFERENCES patients(patient_number) ON DELETE CASCADE
+);
+
+-- general health
+CREATE TABLE general_health (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    patient_number INT(8) UNSIGNED NOT NULL,
+    general_health TEXT,
+    physical TEXT,
+    mental TEXT,
+    temperature DECIMAL(5,2),
+    blood_pressure VARCHAR(20),
+    respiratory_rate INT,
+    pulse_rate INT,
+    other_general_notes TEXT,
+    FOREIGN KEY (patient_number) REFERENCES patients(patient_number) ON DELETE CASCADE
+);
+
+
+-- extraoral 
+CREATE TABLE extraoral_examination (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    patient_number INT(8) UNSIGNED NOT NULL,
+    head_face TEXT,
+    eyes TEXT,
+    ears TEXT,
+    nose TEXT,
+    hair TEXT,
+    neck TEXT,
+    paranasal TEXT,
+    lymph_nodes TEXT,
+    salivary_glands TEXT,
+    tmj TEXT,
+    muscles_of_mastication TEXT,
+    other_extraoral TEXT,
+    FOREIGN KEY (patient_number) REFERENCES patients(patient_number) ON DELETE CASCADE
+);
+
+-- intraoral
+CREATE TABLE intraoral_examination (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    patient_number INT(8) UNSIGNED NOT NULL,
+    lips TEXT,
+    buccal_mucosa TEXT,
+    alveolar_mucosa TEXT,
+    floor_of_mouth TEXT,
+    tongue TEXT,
+    saliva TEXT,
+    pillars_of_fauces TEXT,
+    tonsils TEXT,
+    uvula TEXT,
+    oropharynx TEXT,
+    other_intraoral TEXT,
+    FOREIGN KEY (patient_number) REFERENCES patients(patient_number) ON DELETE CASCADE
+);
+
+-- periodontal
+CREATE TABLE periodontal_examination (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    patient_number INT(8) UNSIGNED NOT NULL,
+    gingiva_health TEXT,
+    degree_of_inflammation TEXT,
+    degree_of_deposits TEXT,
+    FOREIGN KEY (patient_number) REFERENCES patients(patient_number) ON DELETE CASCADE
+);
+
+-- occlusion
+CREATE TABLE occlusion (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    patient_number INT(8) UNSIGNED NOT NULL,
+    molar_class_left TEXT,
+    molar_class_right TEXT,
+    canine_class_left TEXT,
+    canine_class_right TEXT,
+    incisal_class_left TEXT,
+    incisal_class_right TEXT,
+    overjet BOOLEAN DEFAULT FALSE,
+    overbite BOOLEAN DEFAULT FALSE,
+    midline_deviation BOOLEAN DEFAULT FALSE,
+    crossbite BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (patient_number) REFERENCES patients(patient_number) ON DELETE CASCADE
+);
+
+-- appliances
+CREATE TABLE appliances (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    patient_number INT(8) UNSIGNED NOT NULL,
+    appliance_description TEXT,
+    FOREIGN KEY (patient_number) REFERENCES patients(patient_number) ON DELETE CASCADE
+);
+
+
+-- dental exam form 
+
+
+
+-- consent form 
+CREATE TABLE consent_forms (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    patient_number INT(8) UNSIGNED NOT NULL,
+    treatment_consent BOOLEAN DEFAULT FALSE,
+    drugs_consent BOOLEAN DEFAULT FALSE,
+    changes_consent BOOLEAN DEFAULT FALSE,
+    radiograph_consent BOOLEAN DEFAULT FALSE,
+    removal_consent BOOLEAN DEFAULT FALSE,
+    crowns_consent BOOLEAN DEFAULT FALSE,
+    root_canal_consent BOOLEAN DEFAULT FALSE,
+    periodontal_consent BOOLEAN DEFAULT FALSE,
+    fillings_consent BOOLEAN DEFAULT FALSE,
+    dentures_consent BOOLEAN DEFAULT FALSE,
+    patient_signature LONGBLOB,
+    witness_signature LONGBLOB,
+    clinician_signature LONGBLOB,
+    consent_date DATE NOT NULL DEFAULT (CURRENT_DATE),
+    FOREIGN KEY (patient_number) REFERENCES patients(patient_number) ON DELETE CASCADE
+);
+
+CREATE TABLE progress_notes (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    case_id INT NOT NULL,
+    patient_number INT UNSIGNED NOT NULL,
+    date DATE NOT NULL,
+    tooth VARCHAR(20),
+    progress_notes TEXT NOT NULL,
+    clinician_id INT NOT NULL,
+    clinical_instructor_id INT NOT NULL,
+    remarks TEXT,
+    FOREIGN KEY (subjective_form_id) REFERENCES subjective_form(id) ON DELETE CASCADE,
+    FOREIGN KEY (patient_number) REFERENCES patients(patient_number) ON DELETE CASCADE,
+    FOREIGN KEY (clinician_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (clinical_instructor_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+
+
+
+

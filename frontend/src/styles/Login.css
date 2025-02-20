@@ -1,0 +1,133 @@
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body Styling */
+.login-page {
+  background-image: url("/5172.jpg");
+  background-size: cover; /* Ensure the image covers the entire page */
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Prevent the image from repeating */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+  width: 100vw; /* Full viewport width */
+  margin: 0; /* Remove margin */
+  padding: 0; /* Remove padding */
+  color: #333;
+}
+
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px; /* Adjust the gap between logos */
+    margin-bottom: 20px; /* Space between logos and the form */
+  }
+  
+  .school-logo{
+    max-width: 150px; /* Adjust the size of the logos */
+    height: auto; /* Maintain aspect ratio */
+  }
+  .department-logo {
+    max-width: 100px; /* Adjust the size of the logos */
+    height: auto; /* Maintain aspect ratio */
+  }
+
+  .dentimerge-icon{
+    padding-bottom: 30px;
+    max-width: 100px; /* Adjust the size of the logos */
+    height: auto; /* Maintain aspect ratio */
+  }
+
+  .dentimerge-word{
+    padding-top: 30px;
+    max-width: 300px; /* Adjust the size of the logos */
+    height: auto; /* Maintain aspect ratio */
+  }
+
+
+/* Login Container */
+.login-page .login-container {
+    background: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    animation: fadeIn 1s ease-in-out;
+    border: 2px solid #735cda;
+  }
+
+
+
+/* Form Styling */
+.login-form h2 {
+  margin-bottom: 1rem;
+  font-size: 2rem;
+  color: #333;
+}
+
+.login-form p {
+  margin-bottom: 2rem;
+  color: #666;
+}
+
+/* Input Group Styling */
+.input-group {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.input-group input:focus {
+  border-color: #6a11cb;
+  outline: none;
+}
+
+/* Button Styling */
+.login-button {
+  width: 100%;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.login-button:hover {
+  background: linear-gradient(135deg, #2575fc, #6a11cb);
+  transform: translateY(-2px);
+}
+
+.login-button:active {
+  transform: translateY(0);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

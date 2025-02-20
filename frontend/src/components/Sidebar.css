@@ -1,0 +1,228 @@
+/* Sidebar Base Styles */
+.sidebar {
+  width: 300px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  background-color: #703e73;
+  color: white;
+  transition: width 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0 0px;
+  overflow: hidden;
+  align-items: center;
+}
+
+/* Collapsed Sidebar */
+.sidebar.collapsed {
+  width: 80px;
+  overflow: visible;
+}
+
+/* Sidebar Header */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 15px;
+}
+
+/* Sidebar Logo */
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Align items to the left */
+  width: 100%;
+  padding-left: 15px; /* Adjust spacing from the left */
+  gap: 10px; /* Add space between logo and text */
+}
+
+.sidebar-logo-img {
+  width: 40px;
+  height: 40px;
+  transition: transform 0.3s ease;
+}
+
+/* Hide logo and name when collapsed */
+.sidebar.collapsed .sidebar-logo,
+.sidebar.collapsed .sidebar-title {
+  display: none;
+}
+
+/* Adjust logo size in collapsed state */
+.sidebar.collapsed .sidebar-logo-img {
+  width: 60px;
+  height: 60px;
+  transform: translateX(-10px);
+}
+
+.sidebar-title {
+  font-size: 25px;
+  font-weight: bold;
+  white-space: nowrap; /* Prevent text from wrapping */
+}
+
+/* Center the collapse button when collapsed */
+.sidebar.collapsed .collapse-btn {
+  width: auto; 
+  min-width: 55px; 
+  display: flex;
+  justify-content: center;
+  overflow: visible;
+}
+
+
+/* Sidebar Links */
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 40px;
+  flex-grow: 1;
+  overflow-y: auto;
+  width: 100%;
+}
+
+.sidebar ul li {
+  padding: 15px 30px;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s ease;
+}
+
+.sidebar ul li a {
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  font-size: 22px;
+}
+
+.sidebar ul li a span {
+  margin-left: 25px;
+}
+
+/* Hide text when collapsed */
+.sidebar.collapsed ul li a span {
+  display: none;
+}
+
+.sidebar ul li:hover {
+  background-color: #5c2a5f;
+}
+
+/* Profile & Logout Section */
+.profile-section {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.profile-info {
+  display: flex;
+  align-items: center;
+}
+
+.profile-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+/* Logout Button */
+.logout-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Collapse Button */
+.collapse-btn {
+  padding: 10px; /* Adjust as needed */
+  display: flex;
+  justify-content: center;
+  background: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+/* Adjust the main content area when sidebar is collapsed */
+.main-content {
+  transition: margin-left 0.3s ease;
+  margin-left: 300px;
+}
+
+.main-content.collapsed {
+  margin-left: 80px;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  display: flex;
+  padding: 10px;
+  width: 100%;
+}
+
+.profile-section {
+  display: flex;
+  align-items: center; /* Align image and text */
+  gap: 10px; /* Space between image and name */
+  width: 100%;
+}
+
+.profile-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.logout-btn:hover {
+  color: #ff4d4d;
+}
+
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 240px;
+  }
+
+  .sidebar.collapsed {
+    width: 70px;
+  }
+
+  .main-content {
+    margin-left: 240px;
+  }
+
+  .main-content.collapsed {
+    margin-left: 70px;
+  }
+}
