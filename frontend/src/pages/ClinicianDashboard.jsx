@@ -174,21 +174,21 @@ const Dashboard = () => {
     <div className="dashboard-page">
       <div className="dashboard-header">
         <h1>Welcome, {currentUser}!</h1>
-        <p>Here you can manage users, patients, and case records.</p>
+        <p>Here is the summary of total patients, and case records.</p> <br />
       </div>
 
       {/* Widgets Section */}
       <div className="dashboard-widgets">
         <div
           className="widget widget-patients"
-          onClick={() => handleWidgetClick("/clinician-patients")}
+          onClick={() => handleWidgetClick("/patients")}
         >
           <h3>Total Patients</h3>
           <p className="count">{counts.totalPatients}</p>
         </div>
         <div
           className="widget widget-cases"
-          onClick={() => handleWidgetClick("/instructor-cases")}
+          onClick={() => handleWidgetClick("/cases")}
         >
           <h3>Total Cases</h3>
           <p className="count">{counts.totalCases}</p>

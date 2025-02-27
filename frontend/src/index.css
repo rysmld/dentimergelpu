@@ -14,8 +14,7 @@
 }
 
 html, body {
-  overflow: visible !important;
-  height: auto !important;
+  overflow: hidden;
 }
 
 a {
@@ -143,8 +142,7 @@ table tr:hover td {
   max-width: 1500px; /* You can adjust this to your desired max width */
   width: 100%;
   box-sizing: border-box;
-  overflow-y: auto; /* Add scroll if content overflows */
-  max-height: 90vh; /* Allow content to scroll if too tall */
+  max-height: 95vh
 }
 
 .modal-close {

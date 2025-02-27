@@ -5,8 +5,8 @@ const mysql = require("mysql2");
 const db = mysql.createConnection({
   host: "localhost",
   user: "root", // Change if needed
-  password: "rysmld", // Add your MySQL password if you have one
-  database: "dentimerge_lpu" // Replace with your actual database name
+  password: "", // Add your MySQL password if you have one
+  database: "dentimerge_test", // Replace with your actual database name
 });
 
 // Connect to MySQL
@@ -19,8 +19,8 @@ db.connect(err => {
 });
 
 // User's student_number whose password needs to be updated
-const student_number = "20240003"; // Change this to the correct student_number
-const plainPassword = "instructor123"; // Change this to the desired password
+const student_number = "20240001"; // Change this to the correct student_number
+const plainPassword = "admin123"; // Change this to the desired password
 
 // Hash the password and update it in the database
 bcrypt.hash(plainPassword, 10, (err, hash) => {

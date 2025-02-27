@@ -1,10 +1,8 @@
 const express = require("express");
-const { getCases } = require("../controllers/caseController");
-const { verifyToken, authorizeRoles } = require("../middlewares/authMiddleware");
-
 const router = express.Router();
+const { addCase, getCases } = require("../controllers/caseController");
 
-router.get("/", verifyToken, authorizeRoles("clinician", "clinical_instructor"), getCases);
-
+router.get("/", getCases);
+router.post("/submit", addCase);
 
 module.exports = router;

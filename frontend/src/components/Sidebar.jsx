@@ -13,7 +13,7 @@ import {
 import "./Sidebar.css"; // Import the external CSS file
 
 const Sidebar = ({ role }) => {
-  const normalizedRole = role?.toLowerCase(); // Normalize the role
+  const normalizedRole = role?.trim().toLowerCase().replace(" ", "_");
   console.log("Normalized role in Sidebar:", normalizedRole); // Debugging line
 
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -26,16 +26,26 @@ const Sidebar = ({ role }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!navLinks[normalizedRole]) {
+      console.warn("Invalid role detected, redirecting to login...");
+      navigate("/");
+    }
+  }, [normalizedRole, navigate]);
+
+  useEffect(() => {
     const fetchUserProfile = async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) throw new Error("No token found");
 
-        const response = await fetch("http://localhost:5000/api/users/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          "http://localhost:5000/api/users/profile",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) throw new Error("Failed to fetch profile");
 
@@ -63,35 +73,35 @@ const Sidebar = ({ role }) => {
       { name: "Dashboard", path: "/admin-dashboard", icon: <Home /> },
       { name: "Users", path: "/users", icon: <User /> },
       { name: "Settings", path: "/settings", icon: <Settings /> },
-      { name: "Help", path: "/help", icon: <HelpCircle /> },
+      // { name: "Help", path: "/help", icon: <HelpCircle /> },
     ],
     clinician: [
       { name: "Dashboard", path: "/clinician-dashboard", icon: <Home /> },
-      { name: "Patients", path: "/clinician-patients", icon: <User /> },
-      { name: "Cases", path: "/clinician-cases", icon: <FileText /> },
+      { name: "Patients", path: "/patients", icon: <User /> },
+      { name: "Cases", path: "/cases", icon: <FileText /> },
       { name: "Settings", path: "/settings", icon: <Settings /> },
-      { name: "Help", path: "/help", icon: <HelpCircle /> },
+      // { name: "Help", path: "/help", icon: <HelpCircle /> },
     ],
     clinical_instructor: [
       { name: "Dashboard", path: "/instructor-dashboard", icon: <Home /> },
       { name: "Users", path: "/users", icon: <User /> },
-      { name: "Patients", path: "/clinician-patients", icon: <User /> },
-      { name: "Cases", path: "/instructor-cases", icon: <FileText /> },
+      { name: "Patients", path: "/patients", icon: <User /> },
+      { name: "Cases", path: "/cases", icon: <FileText /> },
       { name: "Settings", path: "/settings", icon: <Settings /> },
-      { name: "Help", path: "/help", icon: <HelpCircle /> },
+      // { name: "Help", path: "/help", icon: <HelpCircle /> },
     ],
-    default:[
-      { name: "Dashboard", path: "/instructor-dashboard", icon: <Home /> },
-      { name: "Users", path: "/users", icon: <User /> },
-      { name: "Patients", path: "/clinician-patients", icon: <User /> },
-      { name: "Cases", path: "/instructor-cases", icon: <FileText /> },
-      { name: "Settings", path: "/settings", icon: <Settings /> },
-      { name: "Help", path: "/help", icon: <HelpCircle /> },
-
-    ]
+    // default: [
+    //   { name: "Dashboard", path: "/instructor-dashboard", icon: <Home /> },
+    //   { name: "Users", path: "/users", icon: <User /> },
+    //   { name: "Patients", path: "/clinician-patients", icon: <User /> },
+    //   { name: "Cases", path: "/instructor-cases", icon: <FileText /> },
+    //   { name: "Settings", path: "/settings", icon: <Settings /> },
+    //   { name: "Help", path: "/help", icon: <HelpCircle /> },
+    // ],
   };
 
-    const links = navLinks[normalizedRole] || navLinks.default;
+  const links = navLinks[normalizedRole] || navLinks.default;
+
 
   return (
     <div className="sidebar-container">

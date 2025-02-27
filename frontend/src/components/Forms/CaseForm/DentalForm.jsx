@@ -1,29 +1,30 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./Form.css";
 
-const DentalForm = ({ currentStep, prevStep, nextStep, formData, setFormData, handleChange }) => {
+const DentalForm = ({
+  currentStep,
+  prevPage,
+  nextPage,
+  formData,
+  setFormData,
+  handleChange,
+}) => {
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [brushColor, setBrushColor] = useState("#000000"); // Default brush color is black
+  const [brushColor, setBrushColor] = useState("#000000");
 
-  // Initialize canvas context and load the initial image
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
-    // Load the initial image onto the canvas
     const image = new Image();
-    image.src = "/dentalcharting.png"; // Path to your tooth chart image
+    image.src = formData.tooth_chart || "/dentalcharting.png"; // Load saved image or default chart
     image.onload = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear before redrawing
       ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
     };
-  }, []);
+  }, [formData.tooth_chart]); // Reload when formData.tooth_chart changes
 
-  useEffect(() => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }, [currentStep]);
-
-  // Handle drawing on the canvas
   const startDrawing = (e) => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -46,7 +47,7 @@ const DentalForm = ({ currentStep, prevStep, nextStep, formData, setFormData, ha
     const y = e.clientY - rect.top;
 
     ctx.strokeStyle = brushColor;
-    ctx.lineWidth = 2; // Brush thickness
+    ctx.lineWidth = 2;
     ctx.lineTo(x, y);
     ctx.stroke();
   };
@@ -55,18 +56,36 @@ const DentalForm = ({ currentStep, prevStep, nextStep, formData, setFormData, ha
     setIsDrawing(false);
   };
 
-  // Save the edited image
-  const saveImage = () => {
+  const saveImage = (e) => {
+    e.preventDefault(); // Prevent form submission
     const canvas = canvasRef.current;
-    const image = canvas.toDataURL("image/png"); // Convert canvas to base64 image
+    const image = canvas.toDataURL("image/png");
     setFormData((prevData) => ({
       ...prevData,
-      editedImage: image, // Save the edited image in formData
+      tooth_chart: image, // Save edited image
     }));
     alert("Image saved!");
   };
 
-  
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+
+    // Reset to default image
+    const image = new Image();
+    image.src = "/dentalcharting.png"; // Reset to original tooth chart
+    image.onload = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    };
+
+    // Clear the saved image in formData
+    setFormData((prevData) => ({
+      ...prevData,
+      tooth_chart: null,
+    }));
+  };
+
   return (
     <div className="form-container">
       <h2>Dental Form</h2>
@@ -91,7 +110,12 @@ const DentalForm = ({ currentStep, prevStep, nextStep, formData, setFormData, ha
                 value={brushColor}
                 onChange={(e) => setBrushColor(e.target.value)}
               />
-              <button onClick={saveImage}>Save</button>
+              <button type="button" onClick={saveImage}>
+                Save
+              </button>
+              <button type="button" onClick={clearCanvas}>
+                Clear
+              </button>
             </div>
           </div>
         </fieldset>
@@ -100,26 +124,28 @@ const DentalForm = ({ currentStep, prevStep, nextStep, formData, setFormData, ha
         <fieldset>
           <legend>Diagnostic Test</legend>
           <input
-                      type="text"
-                      value={formData.diagnosticTest}
-                      onChange={handleChange}
-                      placeholder="Notes"/>
+            type="text"
+            name="diagnostic_test"
+            value={formData.diagnostic_test || ""}
+            onChange={handleChange}
+            placeholder="Notes"
+          />
         </fieldset>
 
         <fieldset>
           <legend>Notes</legend>
           <input
-                      type="text"
-                      value={formData.diagnosticTestNotes}
-                      onChange={handleChange}
-                      placeholder="Notes"/>
+            type="text"
+            name="diagnostic_test_notes"
+            value={formData.diagnostic_test_notes || ""}
+            onChange={handleChange}
+            placeholder="Notes"
+          />
         </fieldset>
 
         <fieldset>
           <div>
-            <h2 className="text-lg font-bold mb-4">
-              Assessment Plan
-            </h2>
+            <h2 className="text-lg font-bold mb-4">Assessment Plan</h2>
             <table>
               <thead>
                 <tr>
@@ -129,348 +155,132 @@ const DentalForm = ({ currentStep, prevStep, nextStep, formData, setFormData, ha
                 </tr>
               </thead>
               <tbody>
-                {/* Main Concern Row */}
-                <tr>
-                  <td>
-                    <label>Main Concern</label>
-                    <label>Priority</label>
-                  </td>
-                  <td>
-                    <label htmlFor="tooth_number">TH#</label>
-                  </td>
-                  <td></td>
-                  <td>
-                    <label htmlFor="priority">PRIORITY</label>
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      value={formData.treatmentNotes || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          treatmentNotes: e.target.value,
-                        }))
-                      }
-                      placeholder="Notes"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      value={formData.prognosis || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          prognosis: e.target.value,
-                        }))
-                      }
-                      placeholder="Prognosis"
-                    />
-                  </td>
-                </tr>
-
-                {/* Other Problems Row */}
-                <tr>
-                  <td>
-                    <label htmlFor="other_problems">Other Problems</label>
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      value={formData.otherProblems || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          otherProblems: e.target.value,
-                        }))
-                      }
-                      placeholder="Th#"
-                    />
-                  </td>
-                  <td>
-                    <label htmlFor="systematic">Systematic:</label>
-                    <input
-                      type="text"
-                      value={formData.systematic || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          systematic: e.target.value,
-                        }))
-                      }
-                    />
-                  </td>
-                  <td>
-                    <label htmlFor="systematic_phase">
-                      SYSTEMATIC <br />
-                      PHASE
-                    </label>
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      value={formData.systematicPhaseNotes || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          systematicPhaseNotes: e.target.value,
-                        }))
-                      }
-                      placeholder="Notes"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      value={formData.systematicPrognosis || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          systematicPrognosis: e.target.value,
-                        }))
-                      }
-                      placeholder="Prognosis"
-                    />
-                  </td>
-                </tr>
-
-                {/* Acute Phase Row */}
-                <tr>
-                  <td></td>
-                  <td><input
-                      type="number"
-                      value={formData.otherProblems || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          otherProblems: e.target.value,
-                        }))
-                      }
-                      placeholder="Th#"
-                    /></td>
-                  <td>
-                    <label htmlFor="acute_phase">Acute</label><input
-                      type="text"
-                      value={formData.otherProblems || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          otherProblems: e.target.value,
-                        }))
-                      }
-                      placeholder="Th#"
-                    /></td>
-                  <td>
-                    <label htmlFor="acute_phase">
-                      ACUTE <br /> PHASE
-                    </label>
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      value={formData.acutePhaseNotes || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          acutePhaseNotes: e.target.value,
-                        }))
-                      }
-                      placeholder="Notes"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      value={formData.acutePhasePrognosis || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          acutePhasePrognosis: e.target.value,
-                        }))
-                      }
-                      placeholder="Prognosis"
-                    />
-                  </td>
-                </tr>
-
-                {/* Disease Control Phase Row */}
-                <tr>
-                  <td></td>
-                  <td>
-                    <input
-                      type="number"
-                      value={formData.diseaseControlThNumber || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          diseaseControlThNumber: e.target.value,
-                        }))
-                      }
-                      placeholder="Th#"
-                    />
-                  </td>
-                  <td>
-                    <label htmlFor="disease">Disease</label>
-                    <input
-                      type="text"
-                      value={formData.diseaseControlNotes || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          diseaseControlNotes: e.target.value,
-                        }))
-                      }
-                      placeholder="Notes"
-                    />
-                  </td>
-                  <td>
-                    <label htmlFor="disease_control">
-                      DISEASE <br /> CONTROL <br /> PHASE
-                    </label>
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      value={formData.diseaseControlPhaseNotes || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          diseaseControlPhaseNotes: e.target.value,
-                        }))
-                      }
-                      placeholder="Notes"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      value={formData.diseaseControlPrognosis || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          diseaseControlPrognosis: e.target.value,
-                        }))
-                      }
-                      placeholder="Prognosis"
-                    />
-                  </td>
-                </tr>
-
-                {/* Definitive Phase Row */}
-                <tr>
-                  <td></td>
-                  <td><input
-                      type="number"
-                      value={formData.otherProblems || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          otherProblems: e.target.value,
-                        }))
-                      }
-                      placeholder="Th#"
-                    /></td>
-                  <td>
-                    <label htmlFor="definitive">Definitive</label><input
-                      type="text"
-                      value={formData.otherProblems || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          otherProblems: e.target.value,
-                        }))
-                      }
-                      placeholder="Th#"
-                    /></td>
-                  <td>
-                    <label htmlFor="definitive_phase">DEFINITIVE <br />PHASE</label>
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      value={formData.definitivePhaseNotes || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          definitivePhaseNotes: e.target.value,
-                        }))
-                      }
-                      placeholder="Notes"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      value={formData.definitivePhasePrognosis || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          definitivePhasePrognosis: e.target.value,
-                        }))
-                      }
-                      placeholder="Prognosis"
-                    />
-                  </td>
-                </tr>
-
-                {/* Maintenance Phase Row */}
-                <tr>
-                  <td></td>
-                  <td><input
-                      type="number"
-                      value={formData.otherProblems || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          otherProblems: e.target.value,
-                        }))
-                      }
-                      placeholder="Th#"
-                    /></td>
-                  <td></td>
-                  <td>
-                    <label htmlFor="maintenance_phase">MAINTENANCE <br /> PHASE </label>
-                  
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      value={formData.maintenancePhaseNotes || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          maintenancePhaseNotes: e.target.value,
-                        }))
-                      }
-                      placeholder="Notes"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      value={formData.maintenancePhasePrognosis || ""}
-                      onChange={(e) =>
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          maintenancePhasePrognosis: e.target.value,
-                        }))
-                      }
-                      placeholder="Prognosis"
-                    />
-                  </td>
-                </tr>
+                {[
+                  {
+                    label: "Main Concern",
+                    key: "mainConcern",
+                  },
+                  {
+                    label: "Other Problems",
+                    key: "otherProblems",
+                  },
+                  {
+                    label: "Acute",
+                    key: "acutePhase",
+                  },
+                  {
+                    label: "Disease",
+                    key: "diseaseControl",
+                  },
+                  {
+                    label: "Definitive",
+                    key: "definitivePhase",
+                  },
+                  {
+                    label: "Maintenance",
+                    key: "maintenancePhase",
+                  },
+                ].map((item, index) => (
+                  <tr key={index}>
+                    <td>
+                      <label>{item.label}</label>
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        value={
+                          formData.assessment_plan?.[item.key]?.tooth_number ||
+                          ""
+                        }
+                        onChange={(e) =>
+                          setFormData((prevData) => ({
+                            ...prevData,
+                            assessment_plan: {
+                              ...prevData.assessment_plan,
+                              [item.key]: {
+                                ...prevData.assessment_plan?.[item.key],
+                                tooth_number: e.target.value,
+                              },
+                            },
+                          }))
+                        }
+                        placeholder="Th#"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="text"
+                        value={
+                          formData.assessment_plan?.[item.key]?.notes || ""
+                        }
+                        onChange={(e) =>
+                          setFormData((prevData) => ({
+                            ...prevData,
+                            assessment_plan: {
+                              ...prevData.assessment_plan,
+                              [item.key]: {
+                                ...prevData.assessment_plan?.[item.key],
+                                notes: e.target.value,
+                              },
+                            },
+                          }))
+                        }
+                        placeholder="Notes"
+                      />
+                    </td>
+                    <td>
+                      <label>{item.label.toUpperCase()} PHASE</label>
+                    </td>
+                    <td>
+                      <input
+                        type="text"
+                        value={
+                          formData.assessment_plan?.[item.key]?.phase_notes ||
+                          ""
+                        }
+                        onChange={(e) =>
+                          setFormData((prevData) => ({
+                            ...prevData,
+                            assessment_plan: {
+                              ...prevData.assessment_plan,
+                              [item.key]: {
+                                ...prevData.assessment_plan?.[item.key],
+                                phase_notes: e.target.value,
+                              },
+                            },
+                          }))
+                        }
+                        placeholder="Notes"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="text"
+                        value={
+                          formData.assessment_plan?.[item.key]?.prognosis || ""
+                        }
+                        onChange={(e) =>
+                          setFormData((prevData) => ({
+                            ...prevData,
+                            assessment_plan: {
+                              ...prevData.assessment_plan,
+                              [item.key]: {
+                                ...prevData.assessment_plan?.[item.key],
+                                prognosis: e.target.value,
+                              },
+                            },
+                          }))
+                        }
+                        placeholder="Prognosis"
+                      />
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
         </fieldset>
       </form>
-
-      {/* Navigation */}
-      <div className="form-grid">
-        <button onClick={prevStep}>Previous</button>
-        <button onClick={nextStep}>Next</button>
-      </div>
     </div>
   );
 };

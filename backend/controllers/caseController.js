@@ -1,57 +1,134 @@
 const db = require("../config/db");
 
-const getCases = async (req, res) => {
-    try {
-        const { search } = req.query;
-
-        let query = `
-            SELECT 
-                sf.id AS subjective_form_id,
-                p.patient_number,
-                p.last_name AS patient_last_name,
-                p.first_name AS patient_first_name,
-                CONCAT(clinician.first_name, ' ', clinician.last_name) AS clinician_name,
-                CONCAT(instructor.first_name, ' ', instructor.last_name) AS clinical_instructor_name,
-                sf.status
-            FROM subjective_form sf
-            JOIN patients p ON sf.patient_number = p.patient_number
-            JOIN users clinician ON sf.clinician_id = clinician.id
-            JOIN users instructor ON sf.clinical_instructor_id = instructor.id
-        `;
-        
-        let queryParams = [];
-        
-        if (search) {
-            query += ` WHERE CONCAT(p.first_name, ' ', p.last_name) LIKE ? 
-                        OR p.patient_number LIKE ? 
-                        OR p.first_name LIKE ? 
-                        OR p.last_name LIKE ?`;
-            queryParams.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
-        }
-
-        query += " ORDER BY p.patient_number ASC";
-
-        console.log("Executing Query:", query);
-        console.log("With Parameters:", queryParams);
-
-        const [rows] = await db.execute(query, queryParams);
-
-        if (!Array.isArray(rows)) {
-            throw new Error("Query result is not an array");
-        }
-
-        // Format patient_number to always have 6 digits with leading zeros
-        const formattedCases = rows.map(caseItem => ({
-            ...caseItem,
-            patient_number: String(caseItem.patient_number).padStart(6, '0'),
-        }));
-
-        console.log("Formatted Query Result:", formattedCases);
-        res.json(formattedCases);
-    } catch (error) {
-        console.error("Error fetching cases:", error);
-        res.status(500).json({ message: "Server error" });
-    }
+const generateCaseNumber = async () => {
+  const [rows] = await db.query(
+    "SELECT MAX(case_number) AS last_case FROM cases"
+  );
+  let lastNumber = rows[0].last_case
+    ? parseInt(rows[0].last_case.split("-")[1])
+    : 0;
+  let newNumber = lastNumber + 1;
+  return `C-${String(newNumber).padStart(6, "0")}`;
 };
 
-module.exports = { getCases };
+const addCase = async (req, res) => {
+  try {
+    const {
+      patient_number,
+      clinician_id,
+      clinical_instructor_id,
+      clinic,
+      chief_complaint,
+      history_of_present_illness,
+      dental_history,
+      family_history,
+      personal_social_history,
+      medical_history,
+      review_of_systems,
+      health_assessment,
+      health_questionnaire,
+      general_appraisal,
+      extraoral_examination,
+      intraoral_examination,
+      periodontal_examination,
+      occlusion,
+      appliances,
+      toothchart,
+      diagnostic_test,
+      diagnostic_test_notes,
+      consent,
+      patient_signature,
+      clinician_signature,
+      clinical_instructor_signature,
+      date,
+    } = req.body;
+
+    if (!patient_number || !clinician_id) {
+      return res
+        .status(400)
+        .json({ message: "Patient number and clinician ID are required" });
+    }
+
+    const case_number = await generateCaseNumber();
+    const status = "for approval";
+    const date_today = new Date().toISOString().split("T")[0];
+
+    const sql = `INSERT INTO cases (case_number, date_today, patient_number, clinician_id, clinical_instructor_id, clinic, chief_complaint,  medical_history, history_of_present_illness,  dental_history, family_history, personal_social_history, review_of_systems, health_assessment, health_questionnaire, general_appraisal, extraoral_examination, intraoral_examination, periodontal_examination, occlusion, appliances, toothchart, diagnostic_test, diagnostic_test_notes, consent, patient_signature, clinician_signature, clinical_instructor_signature, date, status) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    await db.query(sql, [
+      case_number,
+      date_today,
+      patient_number,
+      clinician_id,
+      clinical_instructor_id,
+      clinic,
+      chief_complaint,
+      medical_history,
+      history_of_present_illness,
+      dental_history,
+      family_history,
+      personal_social_history,
+      review_of_systems,
+      health_assessment,
+      health_questionnaire,
+      general_appraisal,
+      extraoral_examination,
+      intraoral_examination,
+      periodontal_examination,
+      occlusion,
+      appliances,
+      toothchart,
+      diagnostic_test,
+      diagnostic_test_notes,
+      consent,
+      patient_signature,
+      clinician_signature,
+      clinical_instructor_signature,
+      date,
+      status,
+    ]);
+
+    res
+      .status(201)
+      .json({ message: "Case submitted successfully", case_number });
+  } catch (error) {
+    console.error("Error submitting case:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const getCases = async (req, res) => {
+  try {
+    const sql = `
+        SELECT 
+          c.case_number,
+          c.patient_number,
+          p.first_name AS patient_first_name,
+          p.last_name AS patient_last_name,
+          c.clinician_id,
+          c.clinical_instructor_id,
+          u1.first_name AS clinician_first_name,
+          u1.last_name AS clinician_last_name,
+          u2.first_name AS clinical_instructor_first_name,
+          u2.last_name AS clinical_instructor_last_name,
+          c.status
+        FROM cases c
+        JOIN patients p ON c.patient_number = p.patient_number
+        JOIN users u1 ON c.clinician_id = u1.id
+        LEFT JOIN users u2 ON c.clinical_instructor_id = u2.id
+        ORDER BY c.created_at DESC
+      `;
+
+    const [rows] = await db.query(sql);
+    res.status(200).json(rows);
+  } catch (error) {
+    console.error("Error fetching cases:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+module.exports = { addCase, getCases };
+  
+
+

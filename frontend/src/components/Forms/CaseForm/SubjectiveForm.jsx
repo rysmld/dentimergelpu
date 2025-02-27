@@ -4,7 +4,7 @@ import "./Form.css";
 
 const SubjectiveForm = ({
   currentStep,
-  nextStep,
+  nextPage,
   formData,
   setFormData,
   handleChange,
@@ -37,21 +37,31 @@ const SubjectiveForm = ({
     fetchData("http://localhost:5000/api/users/patients", setPatients);
   }, []);
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [currentStep]);
-
   const handlePatientChange = (selectedOption) => {
     setFormData((prevData) => ({
       ...prevData,
-      patientSelection: selectedOption.value,
+      patient_number: selectedOption.value, // Map to patient_number
       gender: selectedOption.gender, // Set gender based on selection
     }));
   };
 
-  const formatOptions = (data) =>
+  const handleClinicianChange = (selectedOption) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      clinician_id: selectedOption ? selectedOption.value : null, // Map to clinician_id
+    }));
+  };
+
+  const handleClinicalInstructorChange = (selectedOption) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      clinical_instructor_id: selectedOption ? selectedOption.value : null, // Map to clinical_instructor_id
+    }));
+  };
+
+  const formatOptions = (data, role) =>
     data.map((item) => ({
-      value: item.student_number || item.patient_number,
+      value: role === "patient" ? item.patient_number : item.student_number,
       label: `${item.first_name} ${item.last_name}`,
     }));
 
@@ -65,7 +75,6 @@ const SubjectiveForm = ({
   return (
     <div className="form-container">
       <h2>SUBJECTIVE</h2>
-      {/* Date and Selection Fields */}
       <fieldset>
         <div className="form-grid">
           <label>
@@ -96,14 +105,13 @@ const SubjectiveForm = ({
         </div>
         <br />
         <div className="form-grid">
-          {/* Patient Search */}
           <label>
             Patient Selection:
             <Select
               options={formatPatientOptions(patients)}
               value={
                 formatPatientOptions(patients).find(
-                  (p) => p.value === formData.patientSelection
+                  (p) => p.value === formData.patient_number
                 ) || null
               }
               onChange={handlePatientChange}
@@ -112,32 +120,34 @@ const SubjectiveForm = ({
             />
           </label>
 
-          {/* Clinician Search */}
           <label>
             Clinician Selection:
             <Select
-              options={formatOptions(clinicians)}
-              value={formData.clinicianSelection}
-              onChange={(selectedOption) =>
-                setFormData({ ...formData, clinicianSelection: selectedOption })
+              options={formatOptions(clinicians, "clinician")}
+              value={
+                formatOptions(clinicians, "clinician").find(
+                  (c) => c.value === formData.clinician_id
+                ) || null
               }
+              onChange={handleClinicianChange}
               isSearchable
               placeholder="Search for a clinician..."
             />
           </label>
 
-          {/* Clinical Instructor Search */}
           <label>
             Clinical Instructor Selection:
             <Select
-              options={formatOptions(clinicalInstructors)}
-              value={formData.clinicalInstructorSelection}
-              onChange={(selectedOption) =>
-                setFormData({
-                  ...formData,
-                  clinicalInstructorSelection: selectedOption,
-                })
+              options={formatOptions(
+                clinicalInstructors,
+                "clinical_instructor"
+              )}
+              value={
+                formatOptions(clinicalInstructors, "clinical_instructor").find(
+                  (ci) => ci.value === formData.clinical_instructor_id
+                ) || null
               }
+              onChange={handleClinicalInstructorChange}
               isSearchable
               placeholder="Search for a clinical instructor..."
             />
@@ -152,8 +162,8 @@ const SubjectiveForm = ({
             Chief Complaint:
             <input
               type="text"
-              name="chiefComplaint"
-              value={formData.chiefComplaint}
+              name="chief_complaint"
+              value={formData.chief_complaint}
               onChange={handleChange}
             />
           </label>
@@ -161,8 +171,8 @@ const SubjectiveForm = ({
             History of Present Illness:
             <input
               type="text"
-              name="historyOfPresentIllness"
-              value={formData.historyOfPresentIllness}
+              name="history_of_present_illness"
+              value={formData.history_of_present_illness}
               onChange={handleChange}
             />
           </label>
@@ -177,8 +187,8 @@ const SubjectiveForm = ({
             Medications Taken? Why?
             <input
               type="text"
-              name="medicationsTaken"
-              value={formData.medicationsTaken}
+              name="medical_history.medicines"
+              value={formData.medical_history.medicinces || ""}
               onChange={handleChange}
             />
           </label>
@@ -187,8 +197,8 @@ const SubjectiveForm = ({
             Allergy to:
             <input
               type="text"
-              name="allergies"
-              value={formData.allergies}
+              name="medical_history.allergies"
+              value={formData.medical_history.allergies || ""}
               onChange={handleChange}
             />
           </label>
@@ -197,8 +207,8 @@ const SubjectiveForm = ({
             Past and Present Illness:
             <input
               type="text"
-              name="pastPresentIllness"
-              value={formData.pastPresentIllness}
+              name="medical_history.past_illness"
+              value={formData.medical_history.past_illness || ""}
               onChange={handleChange}
             />
           </label>
@@ -207,8 +217,8 @@ const SubjectiveForm = ({
             Last Examined by a Physician? Why? Result?:
             <input
               type="text"
-              name="lastExaminedByPhysician"
-              value={formData.lastExaminedByPhysician}
+              name="medical_history.last_exam"
+              value={formData.medical_history.last_exam || ""}
               onChange={handleChange}
             />
           </label>
@@ -217,8 +227,8 @@ const SubjectiveForm = ({
             Hospitalization Experience?:
             <input
               type="text"
-              name="hospitalizationExperience"
-              value={formData.hospitalizationExperience}
+              name="medical_history.hospitalization"
+              value={formData.medical_history.hospitalization || ""}
               onChange={handleChange}
             />
           </label>
@@ -227,8 +237,8 @@ const SubjectiveForm = ({
             Bleeding Tendencies:
             <input
               type="text"
-              name="bleedingTendencies"
-              value={formData.bleedingTendencies}
+              name="medical_history.bleeding_tendencies"
+              value={formData.medical_history.bleeding_tendencies || ""}
               onChange={handleChange}
             />
           </label>
@@ -255,8 +265,8 @@ const SubjectiveForm = ({
             Dental History:
             <input
               type="text"
-              name="dentalHistory"
-              value={formData.dentalHistory}
+              name="dental_history"
+              value={formData.dental_history}
               onChange={handleChange}
             />
           </label>
@@ -270,8 +280,8 @@ const SubjectiveForm = ({
             Family History:
             <input
               type="text"
-              name="familyHistory"
-              value={formData.familyHistory}
+              name="family_history"
+              value={formData.family_history}
               onChange={handleChange}
             />
           </label>
@@ -285,8 +295,8 @@ const SubjectiveForm = ({
             Personal and Social History:
             <input
               type="text"
-              name="personalSocialHistory"
-              value={formData.personalSocialHistory}
+              name="personal_social_history"
+              value={formData.personal_social_history}
               onChange={handleChange}
             />
           </label>
@@ -302,8 +312,8 @@ const SubjectiveForm = ({
             <input
               type="text"
               id="skin"
-              name="reviewOfSystems.skin"
-              value={formData.reviewOfSystems.skin}
+              name="review_of_systems.skin"
+              value={formData.review_of_systems.skin}
               onChange={handleChange}
             />
           </label>
@@ -312,8 +322,8 @@ const SubjectiveForm = ({
             Extremities:
             <input
               type="text"
-              name="reviewOfSystems.extremities"
-              value={formData.reviewOfSystems.extremities}
+              name="review_of_systems.extremities"
+              value={formData.review_of_systems.extremities}
               onChange={handleChange}
             />
           </label>
@@ -323,8 +333,8 @@ const SubjectiveForm = ({
             <input
               type="text"
               id="eyes"
-              name="reviewOfSystems.eyes"
-              value={formData.reviewOfSystems.eyes}
+              name="review_of_systems.eyes"
+              value={formData.review_of_systems.eyes}
               onChange={handleChange}
             />
           </label>
@@ -334,8 +344,8 @@ const SubjectiveForm = ({
             <input
               type="text"
               id="ent"
-              name="reviewOfSystems.ent"
-              value={formData.reviewOfSystems.ent}
+              name="review_of_systems.ent"
+              value={formData.review_of_systems.ent}
               onChange={handleChange}
             />
           </label>
@@ -345,8 +355,8 @@ const SubjectiveForm = ({
             <input
               type="text"
               id="respiratory"
-              name="reviewOfSystems.respiratory"
-              value={formData.reviewOfSystems.respiratory}
+              name="review_of_systems.respiratory"
+              value={formData.review_of_systems.respiratory}
               onChange={handleChange}
             />
           </label>
@@ -356,8 +366,8 @@ const SubjectiveForm = ({
             <input
               type="text"
               id="cardiovascular"
-              name="reviewOfSystems.cardiovascular"
-              value={formData.reviewOfSystems.cardiovascular}
+              name="review_of_systems.cardiovascular"
+              value={formData.review_of_systems.cardiovascular}
               onChange={handleChange}
             />
           </label>
@@ -367,8 +377,8 @@ const SubjectiveForm = ({
             <input
               type="text"
               id="gastrointestinal"
-              name="reviewOfSystems.gastrointestinal"
-              value={formData.reviewOfSystems.gastrointestinal}
+              name="review_of_systems.gastrointestinal"
+              value={formData.review_of_systems.gastrointestinal}
               onChange={handleChange}
             />
           </label>
@@ -378,8 +388,8 @@ const SubjectiveForm = ({
             <input
               type="text"
               id="genitourinary"
-              name="reviewOfSystems.genitourinary"
-              value={formData.reviewOfSystems.genitourinary}
+              name="review_of_systems.genitourinary"
+              value={formData.review_of_systems.genitourinary}
               onChange={handleChange}
             />
           </label>
@@ -389,8 +399,8 @@ const SubjectiveForm = ({
             <input
               type="text"
               id="endocrine"
-              name="reviewOfSystems.endocrine"
-              value={formData.reviewOfSystems.endocrine}
+              name="review_of_systems.endocrine"
+              value={formData.review_of_systems.endocrine}
               onChange={handleChange}
             />
           </label>
@@ -400,8 +410,8 @@ const SubjectiveForm = ({
             <input
               type="text"
               id="hematopoietic"
-              name="reviewOfSystems.hematopoietic"
-              value={formData.reviewOfSystems.hematopoietic}
+              name="review_of_systems.hematopoietic"
+              value={formData.review_of_systems.hematopoietic}
               onChange={handleChange}
             />
           </label>
@@ -411,8 +421,8 @@ const SubjectiveForm = ({
             <input
               type="text"
               id="neurological"
-              name="reviewOfSystems.neurological"
-              value={formData.reviewOfSystems.neurological}
+              name="review_of_systems.neurological"
+              value={formData.review_of_systems.neurological}
               onChange={handleChange}
             />
           </label>
@@ -422,8 +432,8 @@ const SubjectiveForm = ({
             <input
               type="text"
               id="psychiatric"
-              name="reviewOfSystems.psychiatric"
-              value={formData.reviewOfSystems.psychiatric}
+              name="review_of_systems.psychiatric"
+              value={formData.review_of_systems.psychiatric}
               onChange={handleChange}
             />
           </label>
@@ -433,8 +443,40 @@ const SubjectiveForm = ({
             <input
               type="text"
               id="growthTumor"
-              name="reviewOfSystems.growthTumor"
-              value={formData.reviewOfSystems.growthTumor}
+              name="review_of_systems.growthTumor"
+              value={formData.review_of_systems.growthTumor}
+              onChange={handleChange}
+            />
+          </label>
+        </div>
+      </fieldset>
+
+      {/* Health Assessment */}
+      <fieldset>
+        <legend>Health Assessment</legend>
+        <div className="form-grid">
+          <label>
+            ASA:
+            <select
+              type="text"
+              name="health_assessment.asa"
+              value={formData.health_assessment.asa || ""}
+              onChange={handleChange}
+            >
+              <option value="">Select Clinic</option>
+              <option value="I">I</option>
+              <option value="II">II</option>
+              <option value="III">III</option>
+              <option value="IV">IV</option>
+            </select>
+          </label>
+
+          <label>
+            Notes:
+            <input
+              type="text"
+              name="health_assessment.asa_notes"
+              value={formData.health_assessment.asa_notes || ""}
               onChange={handleChange}
             />
           </label>
@@ -450,9 +492,9 @@ const SubjectiveForm = ({
           My last medical physical evaluation was on (approximately)?
           <input
             type="date"
-            id="lastPhysical"
-            name="healthQuestionnaire.lastPhysical"
-            value={formData.healthQuestionnaire.lastPhysical}
+            id="last_physical"
+            name="health_questionnaire.last_physical"
+            value={formData.health_questionnaire.last_physical}
             onChange={handleChange}
           />
         </label>
@@ -461,8 +503,8 @@ const SubjectiveForm = ({
           <input
             type="text"
             id="physician"
-            name="healthQuestionnaire.physician"
-            value={formData.healthQuestionnaire.physician}
+            name="health_questionnaire.physician"
+            value={formData.health_questionnaire.physician}
             onChange={handleChange}
           />
         </label>
@@ -471,23 +513,23 @@ const SubjectiveForm = ({
         <label>
           Are you now under the care of a physician?
           <select
-            name="healthQuestionnaire.underCare"
-            id="underCare"
-            value={formData.healthQuestionnaire.underCare}
+            name="health_questionnaire.under_care"
+            id="under_care"
+            value={formData.health_questionnaire.under_care}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
             <option value="No">No</option>
           </select>
         </label>
-        {formData.healthQuestionnaire.underCare === "Yes" && (
+        {formData.health_questionnaire.under_care === "Yes" && (
           <label>
             What is the Condition being Treated?
             <input
               type="text"
-              name="healthQuestionnaire.underCareDetails"
+              name="health_questionnaire.under_care_details"
               onChange={handleChange}
-              value={formData.healthQuestionnaire.underCareDetails}
+              value={formData.health_questionnaire.under_care_details}
             />
           </label>
         )}
@@ -496,22 +538,22 @@ const SubjectiveForm = ({
         <label>
           Have you had any serious illness?
           <select
-            name="healthQuestionnaire.seriousIllness"
-            id="seriousIllnessDetails"
-            value={formData.healthQuestionnaire.seriousIllness}
+            name="health_questionnaire.serious_illness"
+            id="serious_illnessDetails"
+            value={formData.health_questionnaire.serious_illness}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
             <option value="No">No</option>
           </select>
         </label>
-        {formData.healthQuestionnaire.seriousIllness === "Yes" && (
+        {formData.health_questionnaire.serious_illness === "Yes" && (
           <label>
             What was the illness or operation?
             <input
               type="text"
-              name="healthQuestionnaire.seriousIllnessDetails"
-              value={formData.healthQuestionnaire.seriousIllnessDetails}
+              name="health_questionnaire.serious_illness_details"
+              value={formData.health_questionnaire.serious_illness_details}
               onChange={handleChange}
             />
           </label>
@@ -521,22 +563,22 @@ const SubjectiveForm = ({
         <label>
           Have you been hospitalized?
           <select
-            name="healthQuestionnaire.hospitalized"
+            name="health_questionnaire.hospitalized"
             id="hospitalized"
-            value={formData.healthQuestionnaire.hospitalized}
+            value={formData.health_questionnaire.hospitalized}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
             <option value="No">No</option>
           </select>
         </label>
-        {formData.healthQuestionnaire.hospitalized === "Yes" && (
+        {formData.health_questionnaire.hospitalized === "Yes" && (
           <label>
             When and What was the problem?
             <input
               type="text"
-              value={formData.healthQuestionnaire.hospitalizedDetails}
-              name="healthQuestionnaire.hospitalizedDetails"
+              value={formData.health_questionnaire.hospitalized_details}
+              name="health_questionnaire.hospitalized_details"
               onChange={handleChange}
             />
           </label>
@@ -547,9 +589,9 @@ const SubjectiveForm = ({
           Have you had abnormal bleeding associated with previous extractions,
           surgery or trauma?
           <select
-            name="healthQuestionnaire.abnormalBleeding"
-            id="abnormalBleeding"
-            value={formData.healthQuestionnaire.abnormalBleeding}
+            name="health_questionnaire.abnormal_bleeding"
+            id="abnormal_bleeding"
+            value={formData.health_questionnaire.abnormal_bleeding}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -561,9 +603,9 @@ const SubjectiveForm = ({
         <label>
           Do you bruise easily?
           <select
-            name="healthQuestionnaire.bruising"
+            name="health_questionnaire.bruising"
             id="bruising"
-            value={formData.healthQuestionnaire.bruising}
+            value={formData.health_questionnaire.bruising}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -575,22 +617,22 @@ const SubjectiveForm = ({
         <label>
           Have you ever required a blood transfusion?
           <select
-            name="healthQuestionnaire.bloodTransfusion"
-            id="bloodTransfusion"
-            value={formData.healthQuestionnaire.bloodTransfusion}
+            name="health_questionnaire.blood_transfusion"
+            id="blood_transfusion"
+            value={formData.health_questionnaire.blood_transfusion}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
             <option value="No">No</option>
           </select>
         </label>
-        {formData.healthQuestionnaire.bloodTransfusion === "Yes" && (
+        {formData.health_questionnaire.blood_transfusion === "Yes" && (
           <label>
             Under what circumstances?
             <input
               type="text"
-              name="healthQuestionnaire.bloodTransfusionDetails"
-              value={formData.healthQuestionnaire.bloodTransfusionDetails}
+              name="health_questionnaire.blood_transfusion_details"
+              value={formData.health_questionnaire.blood_transfusion_details}
               onChange={handleChange}
             />
           </label>
@@ -601,9 +643,9 @@ const SubjectiveForm = ({
           Do you have any blood disorder such as anemia, including sickle cell
           anemia?
           <select
-            name="healthQuestionnaire.bloodDisorder"
-            id="bloodDisorder"
-            value={formData.healthQuestionnaire.bloodDisorder}
+            name="health_questionnaire.blood_disorder"
+            id="blood_disorder"
+            value={formData.health_questionnaire.blood_disorder}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -616,9 +658,9 @@ const SubjectiveForm = ({
           Have you had surgery or radiation treatment for a tumor, cancer, or
           other condition of your head or neck?
           <select
-            name="healthQuestionnaire.tumorSurgery"
-            id="tumorSurgery"
-            value={formData.healthQuestionnaire.tumorSurgery}
+            name="health_questionnaire.tumor_surgery"
+            id="tumor_surgery"
+            value={formData.health_questionnaire.tumor_surgery}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -630,22 +672,22 @@ const SubjectiveForm = ({
         <label>
           Are you taking any drugs or medicines?
           <select
-            name="healthQuestionnaire.medications"
+            name="health_questionnaire.medications"
             id="medications"
-            value={formData.healthQuestionnaire.medications}
+            value={formData.health_questionnaire.medications}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
             <option value="No">No</option>
           </select>
         </label>
-        {formData.healthQuestionnaire.medications === "Yes" && (
+        {formData.health_questionnaire.medications === "Yes" && (
           <label>
             What Medicines?
             <input
               type="text"
-              name="healthQuestionnaire.medicationsDetails"
-              value={formData.healthQuestionnaire.medicationsDetails}
+              name="health_questionnaire.medications_details"
+              value={formData.health_questionnaire.medications_details}
               onChange={handleChange}
             />
           </label>
@@ -659,9 +701,9 @@ const SubjectiveForm = ({
         <label>
           Rheumatic Fever
           <select
-            name="healthQuestionnaire.diseases.rheumaticFever"
-            id="rheumaticFever"
-            value={formData.healthQuestionnaire.diseases.rheumaticFever}
+            name="health_questionnaire.diseases.rheumatic_fever"
+            id="rheumatic_fever"
+            value={formData.health_questionnaire.diseases.rheumatic_fever}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -672,9 +714,9 @@ const SubjectiveForm = ({
         <label>
           Heart Abnormalities present since birth
           <select
-            name="healthQuestionnaire.diseases.heartAbnormalities"
-            id="heartAbnormalities"
-            value={formData.healthQuestionnaire.diseases.heartAbnormalities}
+            name="health_questionnaire.diseases.heart_abnormalities"
+            id="heart_abnormalities"
+            value={formData.health_questionnaire.diseases.heart_abnormalities}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -686,9 +728,11 @@ const SubjectiveForm = ({
           Cardiovascular Disease (heart trouble, heart attack, angina, stroke,
           high blood pressure, heart murmur)
           <select
-            name="healthQuestionnaire.diseases.cardiovascularDisease"
-            id="cardiovascularDisease"
-            value={formData.healthQuestionnaire.diseases.cardiovascularDisease}
+            name="health_questionnaire.diseases.cardiovascular_disease"
+            id="cardiovascular_disease"
+            value={
+              formData.health_questionnaire.diseases.cardiovascular_disease
+            }
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -699,21 +743,22 @@ const SubjectiveForm = ({
         <label>
           Childhood Diseases?
           <select
-            name="healthQuestionnaire.childhoodDiseases"
-            id="childhoodDiseases"
-            value={formData.healthQuestionnaire.childhoodDiseases}
+            name="health_questionnaire.childhood_diseases"
+            id="childhood_diseases"
+            value={formData.health_questionnaire.childhood_diseases}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
             <option value="No">No</option>
           </select>
         </label>
-        {formData.healthQuestionnaire.childhoodDiseases === "Yes" && (
+        {formData.health_questionnaire.childhood_diseases === "Yes" && (
           <label>
             What are they?
             <input
               type="text"
-              name="healthQuestionnaire.childhoodDiseasesDetails"
+              name="health_questionnaire.childhood_diseases_details"
+              value={formData.health_questionnaire.childhood_diseases_details}
               onChange={handleChange}
             />
           </label>
@@ -722,9 +767,9 @@ const SubjectiveForm = ({
         <label>
           Asthma or Hay Fever
           <select
-            name="healthQuestionnaire.diseases.asthma"
+            name="health_questionnaire.diseases.asthma"
             id="asthma"
-            value={formData.healthQuestionnaire.diseases.asthma}
+            value={formData.health_questionnaire.diseases.asthma}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -735,9 +780,9 @@ const SubjectiveForm = ({
         <label>
           Hives or Skin Rash
           <select
-            name="healthQuestionnaire.diseases.hives"
+            name="health_questionnaire.diseases.hives"
             id="hives"
-            value={formData.healthQuestionnaire.diseases.hives}
+            value={formData.health_questionnaire.diseases.hives}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -748,9 +793,9 @@ const SubjectiveForm = ({
         <label>
           Fainting spells or Seizures
           <select
-            name="healthQuestionnaire.diseases.fainting"
+            name="health_questionnaire.diseases.fainting"
             id="fainting"
-            value={formData.healthQuestionnaire.diseases.fainting}
+            value={formData.health_questionnaire.diseases.fainting}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -761,9 +806,9 @@ const SubjectiveForm = ({
         <label>
           Diabetes
           <select
-            name="healthQuestionnaire.diseases.diabetes"
+            name="health_questionnaire.diseases.diabetes"
             id="diabetes"
-            value={formData.healthQuestionnaire.diseases.diabetes}
+            value={formData.health_questionnaire.diseases.diabetes}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -774,9 +819,9 @@ const SubjectiveForm = ({
         <label>
           Do you have to Urinate more than six times a day?
           <select
-            name="healthQuestionnaire.diseases.frequentUrination"
-            id="frequentUrination"
-            value={formData.healthQuestionnaire.diseases.frequentUrination}
+            name="health_questionnaire.diseases.frequent_urination"
+            id="frequent_urination"
+            value={formData.health_questionnaire.diseases.frequent_urination}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -787,9 +832,9 @@ const SubjectiveForm = ({
         <label>
           Are you thirsty much of the time?
           <select
-            name="healthQuestionnaire.diseases.thirstiness"
-            id="dryMouth"
-            value={formData.healthQuestionnaire.diseases.thirstiness}
+            name="health_questionnaire.diseases.thirstiness"
+            id="dry_mouth"
+            value={formData.health_questionnaire.diseases.thirstiness}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -800,9 +845,9 @@ const SubjectiveForm = ({
         <label>
           Does your mouth usually feel dry?
           <select
-            name="healthQuestionnaire.diseases.dryMouth"
-            id="dryMouth"
-            value={formData.healthQuestionnaire.diseases.dryMouth}
+            name="health_questionnaire.diseases.dry_mouth"
+            id="dry_mouth"
+            value={formData.health_questionnaire.diseases.dry_mouth}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -813,9 +858,9 @@ const SubjectiveForm = ({
         <label>
           Hepatitis, Jaundice or Liver Disease
           <select
-            name="healthQuestionnaire.diseases.hepatitis"
+            name="health_questionnaire.diseases.hepatitis"
             id="hepatitis"
-            value={formData.healthQuestionnaire.diseases.hepatitis}
+            value={formData.health_questionnaire.diseases.hepatitis}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -826,9 +871,9 @@ const SubjectiveForm = ({
         <label>
           Arthritis or other joint problems
           <select
-            name="healthQuestionnaire.diseases.arthritis"
+            name="health_questionnaire.diseases.arthritis"
             id="arthritis"
-            value={formData.healthQuestionnaire.diseases.arthritis}
+            value={formData.health_questionnaire.diseases.arthritis}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -839,9 +884,9 @@ const SubjectiveForm = ({
         <label>
           Stomach Ulcers
           <select
-            name="healthQuestionnaire.diseases.stomachUlcers"
+            name="health_questionnaire.diseases.stomachUlcers"
             id="stomachUlcers"
-            value={formData.healthQuestionnaire.diseases.stomachUlcers}
+            value={formData.health_questionnaire.diseases.stomachUlcers}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -852,9 +897,9 @@ const SubjectiveForm = ({
         <label>
           Kidney Trouble
           <select
-            name="healthQuestionnaire.diseases.kidneyTrouble"
-            id="kidneyTrouble"
-            value={formData.healthQuestionnaire.diseases.kidneyTrouble}
+            name="health_questionnaire.diseases.kidney_trouble"
+            id="kidney_trouble"
+            value={formData.health_questionnaire.diseases.kidney_trouble}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -865,9 +910,9 @@ const SubjectiveForm = ({
         <label>
           Tuberculosis
           <select
-            name="healthQuestionnaire.diseases.tuberculosis"
+            name="health_questionnaire.diseases.tuberculosis"
             id="tuberculosis"
-            value={formData.healthQuestionnaire.diseases.tuberculosis}
+            value={formData.health_questionnaire.diseases.tuberculosis}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -878,9 +923,9 @@ const SubjectiveForm = ({
         <label>
           Venereal Disease
           <select
-            name="healthQuestionnaire.diseases.venerealDisease"
-            id="venerealDisease"
-            value={formData.healthQuestionnaire.diseases.venerealDisease}
+            name="health_questionnaire.diseases.venereal_disease"
+            id="venereal_disease"
+            value={formData.health_questionnaire.diseases.venereal_disease}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -892,9 +937,9 @@ const SubjectiveForm = ({
           Other Conditions
           <input
             type="text"
-            id="otherConditions"
-            name="healthQuestionnaire.diseases.otherConditions"
-            value={formData.healthQuestionnaire.diseases.otherConditions}
+            id="other_conditions"
+            name="health_questionnaire.diseases.other_conditions"
+            value={formData.health_questionnaire.diseases.other_conditions}
             onChange={handleChange}
           />
         </label>
@@ -905,9 +950,9 @@ const SubjectiveForm = ({
         <label>
           Local Anesthetics
           <select
-            name="healthQuestionnaire.allergies.localAnesthetics"
-            id="localAnesthetics"
-            value={formData.healthQuestionnaire.allergies.localAnesthetics}
+            name="health_questionnaire.allergies.local_anesthetics"
+            id="local_anesthetics"
+            value={formData.health_questionnaire.allergies.local_anesthetics}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -918,9 +963,9 @@ const SubjectiveForm = ({
         <label>
           Penicillin
           <select
-            name="healthQuestionnaire.allergies.penicillin"
+            name="health_questionnaire.allergies.penicillin"
             id="penicillin"
-            value={formData.healthQuestionnaire.allergies.penicillin}
+            value={formData.health_questionnaire.allergies.penicillin}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -931,9 +976,9 @@ const SubjectiveForm = ({
         <label>
           Aspirin
           <select
-            name="healthQuestionnaire.allergies.aspirin"
+            name="health_questionnaire.allergies.aspirin"
             id="aspirin"
-            value={formData.healthQuestionnaire.allergies.aspirin}
+            value={formData.health_questionnaire.allergies.aspirin}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -944,9 +989,9 @@ const SubjectiveForm = ({
         <label>
           Latex Gloves
           <select
-            name="healthQuestionnaire.allergies.latexGloves"
-            id="latexGloves"
-            value={formData.healthQuestionnaire.allergies.latexGloves}
+            name="health_questionnaire.allergies.latex_gloves"
+            id="latex_gloves"
+            value={formData.health_questionnaire.allergies.latex_gloves}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -958,9 +1003,9 @@ const SubjectiveForm = ({
           Other Allergies (please specify):
           <input
             type="text"
-            name="healthQuestionnaire.allergies.others"
+            name="health_questionnaire.allergies.other_allergies"
             id="others"
-            value={formData.healthQuestionnaire.allergies.othersAllergies}
+            value={formData.health_questionnaire.allergies.other_allergies}
             placeholder="Specify other allergies"
             onChange={handleChange}
           />
@@ -971,22 +1016,22 @@ const SubjectiveForm = ({
           Have you had any serious trouble associated with any previous dental
           treatment?
           <select
-            name="healthQuestionnaire.dentalTrouble"
-            id="healthQuestionnaire.dentalTrouble"
-            value={formData.healthQuestionnaire.dentalTrouble}
+            name="health_questionnaire.dental_trouble"
+            id="health_questionnaire.dental_trouble"
+            value={formData.health_questionnaire.dental_trouble}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
             <option value="No">No</option>
           </select>
         </label>
-        {formData.healthQuestionnaire.dentalTrouble === "Yes" && (
+        {formData.health_questionnaire.dental_trouble === "Yes" && (
           <label>
             What Trouble?
             <input
               type="text"
-              name="healthQuestionnaire.dentalTroubleDetails"
-              value={formData.healthQuestionnaire.dentalTroubleDetails}
+              name="health_questionnaire.dental_trouble_details"
+              value={formData.health_questionnaire.dental_trouble_details}
               onChange={handleChange}
             />
           </label>
@@ -997,22 +1042,22 @@ const SubjectiveForm = ({
           Do you have any disease, condition, or problem not listed above that
           you think I should know about?
           <select
-            name="healthQuestionnaire.unlistedDisease"
-            id="healthQuestionnaire.unlistedDisease"
-            value={formData.healthQuestionnaire.unlistedDisease}
+            name="health_questionnaire.unlisted_disease"
+            id="health_questionnaire.unlisted_disease"
+            value={formData.health_questionnaire.unlisted_disease}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
             <option value="No">No</option>
           </select>
         </label>
-        {formData.healthQuestionnaire.unlistedDisease === "Yes" && (
+        {formData.health_questionnaire.unlisted_disease === "Yes" && (
           <label>
             What disease?
             <input
               type="text"
-              name="healthQuestionnaire.unlistedDiseaseDetails"
-              value={formData.healthQuestionnaire.unlistedDiseaseDetails}
+              name="health_questionnaire.unlisted_disease_details"
+              value={formData.health_questionnaire.unlisted_disease_details}
               onChange={handleChange}
             />
           </label>
@@ -1023,9 +1068,9 @@ const SubjectiveForm = ({
           Are you employed in any situation which exposes you regularly to
           x-rays or other ionizing radiation?
           <select
-            name="healthQuestionnaire.radiationExposure"
-            id="radiationExposure"
-            value={formData.healthQuestionnaire.radiationExposure}
+            name="health_questionnaire.radiation_exposure"
+            id="radiation_exposure"
+            value={formData.health_questionnaire.radiation_exposure}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -1037,9 +1082,9 @@ const SubjectiveForm = ({
         <label>
           Are you wearing eyeglasses or contact lenses?
           <select
-            name="healthQuestionnaire.glasses"
+            name="health_questionnaire.glasses"
             id="glasses"
-            value={formData.healthQuestionnaire.glasses}
+            value={formData.health_questionnaire.glasses}
             onChange={handleChange}
           >
             <option value="Yes">Yes</option>
@@ -1053,9 +1098,9 @@ const SubjectiveForm = ({
             <label>
               Are you pregnant or have you recently missed a menstrual period?
               <select
-                name="healthQuestionnaire.menstrualPeriod"
-                id="menstrualPeriod"
-                value={formData.healthQuestionnaire.menstrualPeriod}
+                name="health_questionnaire.menstrual_period"
+                id="menstrual_period"
+                value={formData.health_questionnaire.menstrual_period}
                 onChange={handleChange}
               >
                 <option value="Yes">Yes</option>
@@ -1066,9 +1111,9 @@ const SubjectiveForm = ({
             <label>
               Are you presently breastfeeding?
               <select
-                name="healthQuestionnaire.breastFeeding"
-                id="breastFeeding"
-                value={formData.healthQuestionnaire.breastFeeding}
+                name="health_questionnaire.breast_feeding"
+                id="breast_feeding"
+                value={formData.health_questionnaire.breast_feeding}
                 onChange={handleChange}
               >
                 <option value="Yes">Yes</option>
@@ -1078,40 +1123,6 @@ const SubjectiveForm = ({
           </>
         )}
       </fieldset>
-
-      {/* Health Assessment */}
-      <fieldset>
-        <legend>Health Assessment</legend>
-        <div className="form-grid">
-          <label>
-            ASA:
-            <select
-              type="text"
-              name="healthAssessment.asa"
-              value={formData.healthAssessment.asa}
-              onChange={handleChange}
-            >
-              <option value="">Select Clinic</option>
-              <option value="I">I</option>
-              <option value="II">II</option>
-              <option value="III">III</option>
-              <option value="IV">IV</option>
-            </select>
-          </label>
-
-          <label>
-            Notes:
-            <input
-              type="text"
-              name="healthAssessment.asaNotes"
-              value={formData.healthAssessment.asaNotes}
-              onChange={handleChange}
-            />
-          </label>
-        </div>
-      </fieldset>
-
-      <button onClick={nextStep}>Next</button>
     </div>
   );
 };

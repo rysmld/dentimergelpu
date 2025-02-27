@@ -63,54 +63,69 @@ const getPatientByNumber = async (req, res) => {
   }
 };
 
-const addPatient = async (req, res) => {
-  const {
-    last_name,
-    first_name,
-    middle_initial,
-    nickname,
-    age,
-    sex_gender,
-    date_of_birth,
-    civil_status,
-    nationality_ethnicity,
-    home_address,
-    home_phone,
-    mobile_no,
-    email,
-    occupation,
-    work_address,
-    work_phone,
-    parent_guardian,
-    parent_contact_number,
-    emergency_contact,
-    emergency_contact_number,
-  } = req.body;
+const generatePatientNumber = async () => {
+  const [rows] = await db.query(
+    "SELECT patient_number FROM patients ORDER BY id DESC LIMIT 1"
+  );
 
-  // Required fields check
-  if (
-    !last_name ||
-    !first_name ||
-    !sex_gender ||
-    !date_of_birth ||
-    !home_address ||
-    !mobile_no ||
-    !emergency_contact ||
-    !emergency_contact_number
-  ) {
-    return res.status(400).json({ message: "Required fields are missing." });
+  let nextNumber = 1;
+  if (rows.length > 0) {
+    const lastNumber = parseInt(rows[0].patient_number.split("-")[1]);
+    nextNumber = lastNumber + 1;
   }
 
+  return `P-${String(nextNumber).padStart(6, "0")}`;
+};
+
+const addPatient = async (req, res) => {
   try {
+    const patient_number = await generatePatientNumber();
+    const {
+      last_name,
+      first_name,
+      middle_initial,
+      nickname,
+      age,
+      sex_gender,
+      date_of_birth,
+      civil_status,
+      nationality_ethnicity,
+      home_address,
+      home_phone,
+      mobile_no,
+      email,
+      occupation,
+      work_address,
+      work_phone,
+      parent_guardian,
+      parent_contact_number,
+      emergency_contact,
+      emergency_contact_number,
+    } = req.body;
+
+    if (
+      !last_name ||
+      !first_name ||
+      !sex_gender ||
+      !date_of_birth ||
+      !home_address ||
+      !mobile_no ||
+      !emergency_contact ||
+      !emergency_contact_number
+    ) {
+      return res.status(400).json({ message: "Required fields are missing." });
+    }
+
     const query = `
       INSERT INTO patients 
-      (last_name, first_name, middle_initial, nickname, age, sex_gender, date_of_birth, civil_status, nationality_ethnicity, 
+      (patient_number, last_name, first_name, middle_initial, nickname, age, sex_gender, date_of_birth, civil_status, nationality_ethnicity, 
        home_address, home_phone, mobile_no, email, occupation, work_address, work_phone, parent_guardian, parent_contact_number, 
        emergency_contact, emergency_contact_number)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const values = [
+      patient_number,
       last_name,
       first_name,
       middle_initial || null,
@@ -137,7 +152,7 @@ const addPatient = async (req, res) => {
 
     res.status(201).json({
       message: "Patient added successfully!",
-      patient_number: result.insertId, // Ensure this matches your database schema
+      patient_number,
     });
   } catch (error) {
     console.error("Error adding patient:", error);
@@ -191,7 +206,12 @@ const updatePatient = async (req, res) => {
 
     // Function to check for changes
     const addIfChanged = (fieldName, newValue, dbValue) => {
-      if (newValue !== undefined && newValue !== null && newValue !== "" && newValue !== dbValue) {
+      if (
+        newValue !== undefined &&
+        newValue !== null &&
+        newValue !== "" &&
+        newValue !== dbValue
+      ) {
         updatedFields.push(`${fieldName} = ?`);
         updateValues.push(newValue);
       }
@@ -199,13 +219,25 @@ const updatePatient = async (req, res) => {
 
     addIfChanged("first_name", first_name, currentPatient[0].first_name);
     addIfChanged("last_name", last_name, currentPatient[0].last_name);
-    addIfChanged("middle_initial", middle_initial, currentPatient[0].middle_initial);
+    addIfChanged(
+      "middle_initial",
+      middle_initial,
+      currentPatient[0].middle_initial
+    );
     addIfChanged("nickname", nickname, currentPatient[0].nickname);
     addIfChanged("age", age, currentPatient[0].age);
     addIfChanged("sex_gender", sex_gender, currentPatient[0].sex_gender);
-    addIfChanged("date_of_birth", date_of_birth, currentPatient[0].date_of_birth);
+    addIfChanged(
+      "date_of_birth",
+      date_of_birth,
+      currentPatient[0].date_of_birth
+    );
     addIfChanged("civil_status", civil_status, currentPatient[0].civil_status);
-    addIfChanged("nationality_ethnicity", nationality_ethnicity, currentPatient[0].nationality_ethnicity);
+    addIfChanged(
+      "nationality_ethnicity",
+      nationality_ethnicity,
+      currentPatient[0].nationality_ethnicity
+    );
     addIfChanged("home_address", home_address, currentPatient[0].home_address);
     addIfChanged("home_phone", home_phone, currentPatient[0].home_phone);
     addIfChanged("mobile_no", mobile_no, currentPatient[0].mobile_no);
@@ -213,11 +245,31 @@ const updatePatient = async (req, res) => {
     addIfChanged("occupation", occupation, currentPatient[0].occupation);
     addIfChanged("work_address", work_address, currentPatient[0].work_address);
     addIfChanged("work_phone", work_phone, currentPatient[0].work_phone);
-    addIfChanged("parent_guardian", parent_guardian, currentPatient[0].parent_guardian);
-    addIfChanged("parent_contact_number", parent_contact_number, currentPatient[0].parent_contact_number);
-    addIfChanged("emergency_contact", emergency_contact, currentPatient[0].emergency_contact);
-    addIfChanged("emergency_contact_number", emergency_contact_number, currentPatient[0].emergency_contact_number);
-    addIfChanged("profile_photo", profile_photo, currentPatient[0].profile_photo);
+    addIfChanged(
+      "parent_guardian",
+      parent_guardian,
+      currentPatient[0].parent_guardian
+    );
+    addIfChanged(
+      "parent_contact_number",
+      parent_contact_number,
+      currentPatient[0].parent_contact_number
+    );
+    addIfChanged(
+      "emergency_contact",
+      emergency_contact,
+      currentPatient[0].emergency_contact
+    );
+    addIfChanged(
+      "emergency_contact_number",
+      emergency_contact_number,
+      currentPatient[0].emergency_contact_number
+    );
+    addIfChanged(
+      "profile_photo",
+      profile_photo,
+      currentPatient[0].profile_photo
+    );
     addIfChanged("thumbmark", thumbmark, currentPatient[0].thumbmark);
 
     if (updatedFields.length === 0) {
@@ -225,7 +277,9 @@ const updatePatient = async (req, res) => {
     }
 
     updateValues.push(patient_number);
-    const query = `UPDATE patients SET ${updatedFields.join(", ")} WHERE patient_number = ?`;
+    const query = `UPDATE patients SET ${updatedFields.join(
+      ", "
+    )} WHERE patient_number = ?`;
 
     console.log("Executing Query:", query, updateValues);
 
@@ -257,7 +311,9 @@ const deletePatient = async (req, res) => {
     }
 
     // Delete the patient
-    await db.query("DELETE FROM patients WHERE patient_number = ?", [patient_number]);
+    await db.query("DELETE FROM patients WHERE patient_number = ?", [
+      patient_number,
+    ]);
 
     res.status(200).json({ message: "Patient deleted successfully" });
   } catch (error) {
@@ -269,6 +325,7 @@ const deletePatient = async (req, res) => {
 module.exports = {
   getAllPatients,
   getPatientByNumber,
+  generatePatientNumber,
   addPatient,
   updatePatient,
   deletePatient,

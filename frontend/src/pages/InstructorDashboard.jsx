@@ -170,6 +170,20 @@ const Dashboard = () => {
     ],
   };
 
+  const caseLineChartData = {
+    labels: weeklyCases?.map((data) => `Week ${data.week}, ${data.year}`) || [],
+    datasets: [
+      {
+        label: "New Cases Per Week",
+        data: weeklyCases?.map((data) => data.count) || [],
+        fill: false,
+        backgroundColor: "rgba(240, 255, 102, 0.5)",
+        borderColor: "rgb(240, 255, 102)",
+        tension: 0.1,
+      },
+    ],
+  };
+
   return (
     <div className="dashboard-page">
       <div className="dashboard-header">
@@ -188,14 +202,14 @@ const Dashboard = () => {
         </div>
         <div
           className="widget widget-patients"
-          onClick={() => handleWidgetClick("/clinician-patients")}
+          onClick={() => handleWidgetClick("/patients")}
         >
           <h3>Total Patients</h3>
           <p className="count">{counts.totalPatients}</p>
         </div>
         <div
           className="widget widget-cases"
-          onClick={() => handleWidgetClick("/clinician-cases")}
+          onClick={() => handleWidgetClick("/cases")}
         >
           <h3>Total Cases</h3>
           <p className="count">{counts.totalCases}</p>
@@ -218,6 +232,14 @@ const Dashboard = () => {
             <h3>Patient</h3>
             {Array.isArray(weeklyPatients) && weeklyPatients.length > 0 ? (
               <Line data={patientLineChartData} />
+            ) : (
+              <p>Loading or No Data Available</p>
+            )}
+          </div>
+          <div className="chart">
+            <h3>Case</h3>
+            {Array.isArray(weeklyCases) && weeklyCases.length > 0 ? (
+              <Line data={caseLineChartData} />
             ) : (
               <p>Loading or No Data Available</p>
             )}
