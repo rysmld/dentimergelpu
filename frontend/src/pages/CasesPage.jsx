@@ -9,26 +9,23 @@ import { FaEdit, FaTrash, FaFileAlt } from "react-icons/fa";
 import { HiUserAdd } from "react-icons/hi";
 import { MdNoteAdd } from "react-icons/md";
 import CaseForm from "../components/Forms/CaseForm/AddCaseForm";
+import ProgressNotesForm from "../components/Forms/ProgressNotes";
 
 const CasesPage = () => {
   const [cases, setCases] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [userRole, setUserRole] = useState(localStorage.getItem("role"));
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showForm, setShowForm] = useState(false);
 
-  const fetchCases = async (query = "") => {
+  const fetchCases = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-
-      const response = await axios.get(
-        `http://localhost:5000/api/cases?search=${query}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
+      const response = await axios.get("http://localhost:5000/api/cases", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setCases(response.data);
     } catch (error) {
       console.error("Error fetching cases:", error);
@@ -52,34 +49,25 @@ const CasesPage = () => {
 
   const columns = useMemo(
     () => [
-      {
-        header: "Case No.",
-        accessorKey: "subjective_form_id",
-      },
-      {
-        header: "Patient No.",
-        accessorKey: "patient_number",
-      },
-      {
-        header: "First Name",
-        accessorKey: "patient_first_name",
-      },
-      {
-        header: "Last Name",
-        accessorKey: "patient_last_name",
-      },
+      { header: "Case No.", accessorKey: "case_number" },
+      { header: "Patient No.", accessorKey: "patient_number" },
+      { header: "First Name", accessorKey: "patient_first_name" },
+      { header: "Last Name", accessorKey: "patient_last_name" },
       {
         header: "Clinician",
         accessorKey: "clinician_name",
+        cell: ({ row }) =>
+          `${row.original.clinician_first_name} ${row.original.clinician_last_name}`,
       },
       {
         header: "Clinical Instructor",
         accessorKey: "clinical_instructor_name",
+        cell: ({ row }) =>
+          row.original.clinical_instructor_id
+            ? `${row.original.clinical_instructor_first_name} ${row.original.clinical_instructor_last_name}`
+            : "N/A",
       },
-      {
-        header: "Status",
-        accessorKey: "status",
-      },
+      { header: "Status", accessorKey: "status" },
       {
         header: "Actions",
         cell: ({ row }) => (
@@ -92,14 +80,12 @@ const CasesPage = () => {
             >
               <FaFileAlt size={20} color="#1591EA" />
             </button>
-
             <button
-              onClick={() => handleEdit(row.original)}
+              onClick={() => handleOpenProgressForm(row.original)}
               style={{ border: "none", background: "none", cursor: "pointer" }}
             >
               <MdNoteAdd size={20} color="#4CAF50" />
             </button>
-
             {userRole !== "Clinician" && (
               <button
                 onClick={() => handleDelete(row.original)}
@@ -128,7 +114,6 @@ const CasesPage = () => {
   const handleAddCase = () => {
     setIsModalOpen(true);
   };
-  
 
   const handleEdit = (caseItem) => {
     console.log("Edit case:", caseItem);
@@ -140,6 +125,14 @@ const CasesPage = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleOpenProgressForm = () => {
+    setShowForm(true);
+  };
+
+  const handleCloseProgressForm = () => {
+    setShowForm(false);
   };
 
   return (
@@ -219,6 +212,14 @@ const CasesPage = () => {
         <div className="modal-overlay">
           <div className="modal-content">
             <CaseForm onClose={handleCloseModal} />
+          </div>
+        </div>
+      )}
+
+      {showForm && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <ProgressNotesForm onClose={handleCloseProgressForm} />
           </div>
         </div>
       )}

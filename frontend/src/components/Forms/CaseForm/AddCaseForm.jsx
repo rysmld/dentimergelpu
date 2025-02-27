@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import SubjectiveForm from "./SubjectiveForm";
 import ObjectiveForm from "./ObjectiveForm";
 import DentalForm from "./DentalForm";
@@ -7,29 +8,59 @@ import "./Form.css";
 
 const AddCaseForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const formContainer = document.querySelector(".form-container");
+    if (formContainer) {
+      formContainer.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [currentStep]);
+
+  // const validateForm = () => {
+  //   if (currentStep === 1) {
+  //     if (!formData.patient_selection || !formData.clinician_selection) {
+  //       alert("Please fill out all required fields.");
+  //       return false;
+  //     }
+  //   }
+  //   // Add validation for other steps as needed
+  //   return true;
+  // };
+
+  const nextPage = () => {
+    // if (!validateForm()) return;
+    setCurrentStep((prev) => prev + 1);
+  };
+
+  const prevPage = () => {
+    setCurrentStep((prev) => prev - 1);
+  };
+
   const [formData, setFormData] = useState({
     //Subjective Data
-    dateToday: "",
-    patientSelection: "",
-    clinicianSelection: "",
-    clinicalInstructorSelection: "",
-    clinicSelection: "",
-    chiefComplaint: "",
-    historyOfPresentIllness: "",
-    medicalHistory: {
-      medications: "",
+    date_today: "",
+    patient_selection: "",
+    clinician_selection: "",
+    clinical_instructor_selection: "",
+    clinic_selection: "",
+    chief_complaint: "",
+    history_of_present_illness: "",
+    medical_history: {
+      medicines: "",
       allergies: "",
-      pastIllness: "",
-      lastExam: "",
+      past_illness: "",
+      last_exam: "",
       hospitalization: "",
-      bleedingTendencies: "",
+      bleeding_tendencies: "",
     },
     contraceptives: "",
-    dentalHistory: "",
-    familyHistory: "",
-    personalSocialHistory: "",
-    reviewOfSystems: {
+    dental_history: "",
+    family_history: "",
+    personal_social_history: "",
+    review_of_systems: {
       skin: "",
       extremities: "",
       eyes: "",
@@ -42,211 +73,274 @@ const AddCaseForm = () => {
       hematopoietic: "",
       neurological: "",
       psychiatric: "",
-      growthTumor: "",
+      growth_tumor: "",
     },
-    healthQuestionnaire: {
-      lastPhysical: "",
+    health_assessment: {
+      asa: "",
+      asa_notes: "",
+    },
+    health_questionnaire: {
+      last_physical: "",
       physician: "",
-      underCare: "No",
-      underCareDetails: "",
-      seriousIllness: "No",
-      seriousIllnessDetails: "",
+      under_care: "No",
+      under_care_details: "",
+      serious_illness: "No",
+      serious_illness_details: "",
       hospitalized: "",
-      hospitalizedDetails: "",
-      abnormalBleeding: "No",
+      hospitalized_details: "",
+      abnormal_bleeding: "No",
       bruising: "No",
-      bloodTransfusion: "",
-      bloodTransfusionDetails: "",
-      bloodDisorder: "No",
-      tumorSurgery: "No",
+      blood_transfusion: "",
+      blood_transfusion_details: "",
+      blood_disorder: "No",
+      tumor_surgery: "No",
       medications: "",
-      medicationsDetails: "",
+      medications_details: "",
       diseases: {
-        rheumaticFever: "No",
-        heartAbnormalities: "No",
-        cardiovascularDisease: "No",
-        childhoodDiseases: "",
-        childhoodDiseasesDetails: "",
+        rheumatic_fever: "No",
+        heart_abnormalities: "No",
+        cardiovascular_disease: "No",
+        childhood_diseases: "",
+        childhood_diseases_details: "",
         asthma: "No",
         hives: "No",
         fainting: "No",
         diabetes: "No",
-        frequentUrination: "No",
+        frequent_urination: "No",
         thirstiness: "No",
-        dryMouth: "No",
+        dry_mouth: "No",
         hepatitis: "No",
         arthritis: "No",
-        stomachUlcers: "No",
-        kidneyTrouble: "No",
+        stomach_ulcers: "No",
+        kidney_trouble: "No",
         tuberculosis: "No",
-        venerealDisease: "No",
-        otherConditions: "",
+        venereal_disease: "No",
+        other_conditions: "",
       },
       allergies: {
-        localAnesthetics: "No",
+        local_anesthetics: "No",
         penicillin: "No",
         aspirin: "No",
-        latexGloves: "No",
-        othersAllergies: "",
+        latex_gloves: "No",
+        other_allergies: "",
       },
-      dentalTrouble: "",
-      dentalTroubleDetails: "",
-      unlistedDisease: "",
-      unlistedDiseaseDetails: "",
-      radiationExposure: "No",
+      dental_trouble: "",
+      dental_trouble_details: "",
+      unlisted_disease: "",
+      unlisted_disease_details: "",
+      radiation_exposure: "No",
       glasses: "No",
-      menstrualPeriod: "",
-      breastFeeding: "",
-    },
-    healthAssessment: {
-      asa: "",
-      asaNotes: "",
+      menstrual_period: "",
+      breast_feeding: "",
     },
 
-    //Objective Data
-    generalHealth: "",
+    // Objective Data
+    general_health: "",
     physical: "",
     mental: "",
     temperature: "",
-    bloodPressure: "",
-    respiratoryRate: "",
-    pulseRate: "",
-    otherGeneralNotes: "",
-    extraoralExamination: {
-      headFace: "",
+    blood_pressure: "",
+    respiratory_rate: "",
+    pulse_rate: "",
+    other_general_notes: "",
+    extraoral_examination: {
+      head_face: "",
       eyes: "",
       ears: "",
       nose: "",
       hair: "",
       neck: "",
       paranasal: "",
-      lymphNodes: "",
-      salivaryGlands: "",
+      lymph_nodes: "",
+      salivary_glands: "",
       tmj: "",
-      musclesOfMastication: "",
-      otherExtraoral: "",
+      muscles_of_mastication: "",
+      other_extraoral: "",
     },
-    intraoralExamination: {
+    intraoral_examination: {
       lips: "",
-      buccalMucosa: "",
-      alveolarMucosa: "",
-      floorOfMouth: "",
+      buccal_mucosa: "",
+      alveolar_mucosa: "",
+      floor_of_mouth: "",
       tongue: "",
       saliva: "",
-      pillarsOfFauces: "",
+      pillars_of_fauces: "",
       tonsils: "",
       uvula: "",
       oropharynx: "",
-      otherIntraoral: "",
+      other_intraoral: "",
     },
-    periodontalExamination: {
+    periodontal_examination: {
       gingiva: "",
-      degreeOfInflammation: "",
-      degreeOfDeposits: "",
+      degree_of_inflammation: "",
+      degree_of_deposits: "",
     },
     occlusion: {
-      molarClassLeft: "",
-      molarClassRight: "",
-      canineClassLeft: "",
-      canineClassRight: "",
-      incisalClassLeft: "",
-      incisalClassRight: "",
+      molar_class_left: "",
+      molar_class_right: "",
+      canine_class_left: "",
+      canine_class_right: "",
+      incisal_class_left: "",
+      incisal_class_right: "",
       overjet: false,
       overbite: false,
-      midlineDeviation: false,
+      midline_deviation: false,
       crossbite: false,
     },
     appliances: "",
 
-    //Dental Data
+    // Dental Data
     toothchart: "",
-    diagnosticeTest: "", 
-    diagnosticeTestNotes:"",
+    diagnostic_test: "",
+    diagnostic_test_notes: "",
+    assessement_plan: "",
 
     // Consent Data
-    treatmentConsent: "",
-    drugsConsent: "",
-    changesConsent: "",
-    radiographConsent: "",
-    removalConsent: "",
-    crownsConsent: "",
-    rootCanalConsent: "",
-    periodontalConsent: "",
-    fillingsConsent: "",
-    denturesConsent: "",
-    patientSignature: "",
-    witnessSignature: "",
-    clinicianSignature: "",
+    treatment_consent: "",
+    drugs_consent: "",
+    changes_consent: "",
+    radiograph_consent: "",
+    removal_consent: "",
+    crowns_consent: "",
+    root_canal_consent: "",
+    periodontal_consent: "",
+    fillings_consent: "",
+    dentures_consent: "",
+    patient_signature: "",
+    witness_signature: "",
+    clinician_signature: "",
     date: "",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const keys = name.split("."); // Split nested keys like "reviewOfSystems.eyes"
-  
+    const keys = name.split("."); // Split nested keys like "medical_history.medications"
+
     setFormData((prev) => {
-      if (keys.length === 1) {
-        // If it's a top-level field
-        return { ...prev, [name]: value };
-      } else {
-        // If it's a nested field (e.g., reviewOfSystems.eyes)
-        const [section, field] = keys;
-        return {
-          ...prev,
-          [section]: {
-            ...prev[section],
-            [field]: value,
-          },
-        };
+      // Create a deep copy of the previous state
+      const updatedData = JSON.parse(JSON.stringify(prev));
+      let currentLevel = updatedData;
+
+      // Traverse the nested structure
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (!currentLevel[keys[i]]) {
+          currentLevel[keys[i]] = {}; // Initialize if the nested object doesn't exist
+        }
+        currentLevel = currentLevel[keys[i]];
       }
+
+      // Set the value at the deepest level
+      currentLevel[keys[keys.length - 1]] = value;
+
+      return updatedData;
     });
   };
-  
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [currentStep]);
+  const submitCase = async (formData) => {
+    console.log("Submitting form data:", formData); // Debugging
 
-  const nextStep = () => setCurrentStep((prev) => prev + 1);
-  const prevStep = () => setCurrentStep((prev) => prev - 1);
+    if (!formData.patient_number || !formData.clinician_id) {
+      alert("Patient and Clinician are required");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        "http://localhost:5000/api/cases/submit",
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("Case submitted:", response.data);
+      alert("Case submitted successfully!");
+      resetForm();
+    } catch (error) {
+      console.error("Error submitting case:", error);
+      if (error.response) {
+        alert(`Error: ${error.response.data.message}`);
+      } else {
+        alert("Failed to submit case. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      // Reset all fields to their initial values
+    });
+    setCurrentStep(1);
+  };
 
   return (
-    <div>
-      {currentStep === 1 && (
-        <SubjectiveForm
-          nextStep={nextStep}
-          formData={formData}
-          setFormData={setFormData}
-          handleChange={handleChange}
-        />
-      )}
-      {currentStep === 2 && (
-        <ObjectiveForm
-          nextStep={nextStep}
-          prevStep={prevStep}
-          formData={formData}
-          setFormData={setFormData}
-          
-        />
-      )}
-      {currentStep === 3 && (
-        <DentalForm
-          nextStep={nextStep}
-          prevStep={prevStep}
-          formData={formData}
-          setFormData={setFormData}
-          handleChange={handleChange}
-        />
-      )}
-      {currentStep === 4 && (
-        <ConsentForm
-          prevStep={prevStep}
-          formData={formData}
-          setFormData={setFormData}
-          handleChange={handleChange}
-        />
-      )}
-    </div>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (currentStep === 4) {
+          submitCase(formData); // Only submit if it's the last step
+        }
+      }}
+    >
+      <div>
+        {currentStep === 1 && (
+          <SubjectiveForm
+            nextPage={nextPage}
+            formData={formData}
+            setFormData={setFormData}
+            handleChange={handleChange}
+          />
+        )}
+        {currentStep === 2 && (
+          <ObjectiveForm
+            nextPage={nextPage}
+            prevPage={prevPage}
+            formData={formData}
+            setFormData={setFormData}
+            handleChange={handleChange}
+          />
+        )}
+        {currentStep === 3 && (
+          <DentalForm
+            nextPage={nextPage}
+            prevPage={prevPage}
+            formData={formData}
+            setFormData={setFormData}
+            handleChange={handleChange}
+          />
+        )}
+        {currentStep === 4 && (
+          <ConsentForm
+            prevPage={prevPage}
+            formData={formData}
+            setFormData={setFormData}
+            handleChange={handleChange}
+          />
+        )}
+
+        {currentStep > 1 && (
+          <button type="button" onClick={prevPage} aria-label="Previous Step">
+            Back
+          </button>
+        )}
+        {currentStep < 4 ? (
+          <button type="button" onClick={nextPage} aria-label="Next Step">
+            Next
+          </button>
+        ) : (
+          <button type="submit" disabled={loading} aria-label="Submit Form">
+            {loading ? "Submitting..." : "Submit"}
+          </button>
+        )}
+      </div>
+    </form>
   );
 };
 

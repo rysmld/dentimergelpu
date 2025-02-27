@@ -10,22 +10,20 @@ app.use(express.json());
 // Import routes
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
-const patientRoutes = require("./routes/patientRoutes")
-const caseRoutes = require("./routes/caseRoutes")
+const patientRoutes = require("./routes/patientRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const profileRoutes = require("./routes/profileRoutes");
-app.use("/api/users", profileRoutes);
-
+const caseRoutes = require("./routes/caseRoutes");
 
 // Use routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/patients", patientRoutes);
-app.use("/api/cases", caseRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/users", profileRoutes);
+app.use("/api/cases", caseRoutes);
 
 
 

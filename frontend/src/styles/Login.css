@@ -7,18 +7,30 @@
 
 /* Body Styling */
 .login-page {
-  background-image: url("/5172.jpg");
-  background-size: cover; /* Ensure the image covers the entire page */
-  background-position: center; /* Center the image */
-  background-repeat: no-repeat; /* Prevent the image from repeating */
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh; /* Full viewport height */
-  width: 100vw; /* Full viewport width */
-  margin: 0; /* Remove margin */
-  padding: 0; /* Remove padding */
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
   color: #333;
+}
+
+.login-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("/5172.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.3; /* Adjust transparency (0 = fully transparent, 1 = opaque) */
+  z-index: -1; /* Puts the background behind the content */
 }
 
 .logo-container {

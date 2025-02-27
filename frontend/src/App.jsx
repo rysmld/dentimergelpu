@@ -61,7 +61,7 @@ function App() {
           }
         />
         <Route
-          path="/clinician-patients"
+          path="/patients"
           element={
             <ProtectedRoute allowedRoles={["clinician", "clinical instructor"]}>
               <DashboardLayout>
@@ -71,19 +71,9 @@ function App() {
           }
         />
         <Route
-          path="/clinician-cases"
+          path="/cases"
           element={
-            <ProtectedRoute allowedRoles={["clinician"]}>
-              <DashboardLayout>
-                <CasesPage />
-              </DashboardLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/instructor-cases"
-          element={
-            <ProtectedRoute allowedRoles={["clinical instructor"]}>
+            <ProtectedRoute allowedRoles={["clinician", "clinical instructor"]}>
               <DashboardLayout>
                 <CasesPage />
               </DashboardLayout>
@@ -93,7 +83,9 @@ function App() {
         <Route
           path="/settings"
           element={
-            <ProtectedRoute allowedRoles={["admin", "clinician", "clinical instructor"]}>
+            <ProtectedRoute
+              allowedRoles={["admin", "clinician", "clinical instructor"]}
+            >
               <DashboardLayout>
                 <SettingsPage />
               </DashboardLayout>
@@ -103,7 +95,9 @@ function App() {
         <Route
           path="/help"
           element={
-            <ProtectedRoute allowedRoles={["admin", "clinician", "clinical instructor"]}>
+            <ProtectedRoute
+              allowedRoles={["admin", "clinician", "clinical instructor"]}
+            >
               <DashboardLayout>
                 <HelpPage />
               </DashboardLayout>

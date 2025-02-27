@@ -1,14 +1,22 @@
 const db = require("../config/db");
 
-// Get total users and patients
+// Get total users, patients, and cases
 const getDashboardCounts = async (req, res) => {
   try {
-    const [[usersCount]] = await db.execute("SELECT COUNT(*) as totalUsers FROM users");
-    const [[patientsCount]] = await db.execute("SELECT COUNT(*) as totalPatients FROM patients");
+    const [[usersCount]] = await db.execute(
+      "SELECT COUNT(*) as totalUsers FROM users"
+    );
+    const [[patientsCount]] = await db.execute(
+      "SELECT COUNT(*) as totalPatients FROM patients"
+    );
+    const [[casesCount]] = await db.execute(
+      "SELECT COUNT(*) as totalCases FROM cases"
+    );
 
     res.json({
       totalUsers: usersCount.totalUsers,
-      totalPatients: patientsCount.totalPatients
+      totalPatients: patientsCount.totalPatients,
+      totalCases: casesCount.totalCases,
     });
   } catch (error) {
     console.error("Error fetching dashboard data:", error.message);
@@ -39,7 +47,7 @@ const getWeeklyCaseGrowth = async (req, res) => {
   try {
     const query = `
       SELECT YEAR(date_created) AS year, WEEK(date_created) AS week, COUNT(*) AS count
-      FROM subjective_form
+      FROM cases
       GROUP BY year, week
       ORDER BY year, week;
     `;
