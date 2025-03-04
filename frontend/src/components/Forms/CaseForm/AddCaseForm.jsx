@@ -31,8 +31,7 @@ const AddCaseForm = () => {
   // };
 
   const nextPage = () => {
-    // if (!validateForm()) return;
-    setCurrentStep((prev) => prev + 1);
+    setCurrentStep((prev) => (prev < 4 ? prev + 1 : prev));
   };
 
   const prevPage = () => {
@@ -49,7 +48,7 @@ const AddCaseForm = () => {
     chief_complaint: "",
     history_of_present_illness: "",
     medical_history: {
-      medicines: "",
+      meds: "",
       allergies: "",
       past_illness: "",
       last_exam: "",
@@ -214,25 +213,19 @@ const AddCaseForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const keys = name.split("."); // Split nested keys like "medical_history.medications"
+    const keys = name.split("."); // Split nested names like "medical_history.medicines"
 
     setFormData((prev) => {
-      // Create a deep copy of the previous state
-      const updatedData = JSON.parse(JSON.stringify(prev));
-      let currentLevel = updatedData;
-
-      // Traverse the nested structure
-      for (let i = 0; i < keys.length - 1; i++) {
-        if (!currentLevel[keys[i]]) {
-          currentLevel[keys[i]] = {}; // Initialize if the nested object doesn't exist
-        }
-        currentLevel = currentLevel[keys[i]];
+      if (keys.length === 2) {
+        return {
+          ...prev,
+          [keys[0]]: {
+            ...prev[keys[0]],
+            [keys[1]]: value,
+          },
+        };
       }
-
-      // Set the value at the deepest level
-      currentLevel[keys[keys.length - 1]] = value;
-
-      return updatedData;
+      return { ...prev, [name]: value };
     });
   };
 
@@ -259,6 +252,11 @@ const AddCaseForm = () => {
       );
 
       console.log("Case submitted:", response.data);
+      console.log(
+        "Form data size:",
+        JSON.stringify(formData).length / 1024,
+        "KB"
+      );
       alert("Case submitted successfully!");
       resetForm();
     } catch (error) {
@@ -285,7 +283,12 @@ const AddCaseForm = () => {
       onSubmit={(e) => {
         e.preventDefault();
         if (currentStep === 4) {
-          submitCase(formData); // Only submit if it's the last step
+          submitCase(formData);
+        }
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && currentStep < 4) {
+          e.preventDefault(); // Prevents accidental submission
         }
       }}
     >
@@ -331,11 +334,11 @@ const AddCaseForm = () => {
           </button>
         )}
         {currentStep < 4 ? (
-          <button type="button" onClick={nextPage} aria-label="Next Step">
+          <button type="button" onClick={nextPage}>
             Next
           </button>
         ) : (
-          <button type="submit" disabled={loading} aria-label="Submit Form">
+          <button type="submit" disabled={loading}>
             {loading ? "Submitting..." : "Submit"}
           </button>
         )}

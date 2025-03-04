@@ -46,7 +46,7 @@ const getWeeklyUserGrowth = async (req, res) => {
 const getWeeklyCaseGrowth = async (req, res) => {
   try {
     const query = `
-      SELECT YEAR(date_created) AS year, WEEK(date_created) AS week, COUNT(*) AS count
+      SELECT YEAR(created_at) AS year, WEEK(created_at) AS week, COUNT(*) AS count
       FROM cases
       GROUP BY year, week
       ORDER BY year, week;

@@ -3,9 +3,18 @@ const bcrypt = require("bcrypt");
 
 const getProfile = async (req, res) => {
   try {
-    const userId = req.user.id; // Extract user ID from token
+    const studentNumber = req.user?.student_number; // Extract student_number from token
 
-    const [rows] = await db.execute("SELECT id, student_number, first_name, last_name, role FROM users WHERE id = ?", [userId]);
+    if (!studentNumber) {
+      return res.status(400).json({ message: "Student number is required" });
+    }
+
+    console.log("Fetching profile for student number:", studentNumber); // Debugging
+
+    const [rows] = await db.execute(
+      "SELECT student_number, first_name, last_name, role FROM users WHERE student_number = ?",
+      [studentNumber]
+    );
 
     if (rows.length === 0) {
       return res.status(404).json({ message: "User not found" });
@@ -17,6 +26,7 @@ const getProfile = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 const getAllUsers = async (req, res) => {
   try {

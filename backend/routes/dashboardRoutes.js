@@ -68,6 +68,6 @@ router.get(
 router.get("/", verifyToken, getDashboardCounts);
 router.get("/weekly-user-growth", verifyToken, getWeeklyUserGrowth);
 router.get("/weekly-patient-growth", verifyToken, getWeeklyPatientGrowth);
-router.get("/weekly-case-growth", verifyToken, getWeeklyCaseGrowth);
+router.get("/weekly-cases-growth", verifyToken, getWeeklyCaseGrowth);
 
 module.exports = router;
