@@ -94,33 +94,6 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    const fetchWeeklyGrowth = async () => {
-      try {
-        const token = localStorage.getItem("token"); // ✅ Get stored token
-
-        const response = await axios.get(
-          "http://localhost:5000/api/dashboard/weekly-user-growth",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`, // ✅ Send token in request
-            },
-          }
-        );
-
-        console.log("API Response:", response.data); // ✅ Debugging log
-        setWeeklyGrowth(response.data.weeklyUserGrowth);
-      } catch (error) {
-        console.error(
-          "Error fetching weekly user growth:",
-          error.response?.data || error.message
-        );
-      }
-    };
-
-    fetchWeeklyGrowth();
-  }, []);
-
-  useEffect(() => {
     const fetchWeeklyPatients = async () => {
       try {
         const response = await axios.get(
@@ -141,19 +114,26 @@ const Dashboard = () => {
     fetchWeeklyPatients();
   }, []);
 
-  const lineChartData = {
-    labels: weeklyGrowth.map((data) => `Week ${data.week}, ${data.year}`),
-    datasets: [
-      {
-        label: "Users Added Per Week",
-        data: weeklyGrowth.map((data) => data.count),
-        fill: false,
-        backgroundColor: "rgba(75, 192, 192, 0.5)",
-        borderColor: "rgba(75, 192, 192, 1)",
-        tension: 0.1,
-      },
-    ],
-  };
+  useEffect(() => {
+    const fetchWeeklyCases = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/dashboard/weekly-cases-growth",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        console.log("API Response:", response.data);
+        setWeeklyCases(response.data.weeklyCaseGrowth);
+      } catch (error) {
+        console.error("Error fetching weekly case growth:", error);
+      }
+    };
+
+    fetchWeeklyCases();
+  }, []);
 
   const patientLineChartData = {
     labels:
@@ -165,6 +145,20 @@ const Dashboard = () => {
         fill: false,
         backgroundColor: "rgba(153, 102, 255, 0.5)",
         borderColor: "rgba(153, 102, 255, 1)",
+        tension: 0.1,
+      },
+    ],
+  };
+
+  const caseLineChartData = {
+    labels: weeklyCases?.map((data) => `Week ${data.week}, ${data.year}`) || [],
+    datasets: [
+      {
+        label: "New Cases Per Week",
+        data: weeklyCases?.map((data) => data.count) || [],
+        fill: false,
+        backgroundColor: "rgba(240, 255, 102, 0.5)",
+        borderColor: "rgb(240, 255, 102)",
         tension: 0.1,
       },
     ],
@@ -200,17 +194,17 @@ const Dashboard = () => {
         <h2>Weekly Statistics</h2>
         <div className="chart-container">
           <div className="chart">
-            <h3>User</h3>
-            {weeklyGrowth.length > 0 ? (
-              <Line data={lineChartData} />
-            ) : (
-              <p>Loading...</p>
-            )}
-          </div>
-          <div className="chart">
             <h3>Patient</h3>
             {Array.isArray(weeklyPatients) && weeklyPatients.length > 0 ? (
               <Line data={patientLineChartData} />
+            ) : (
+              <p>Loading or No Data Available</p>
+            )}
+          </div>
+          <div className="chart">
+            <h3>Case</h3>
+            {Array.isArray(weeklyCases) && weeklyCases.length > 0 ? (
+              <Line data={caseLineChartData} />
             ) : (
               <p>Loading or No Data Available</p>
             )}

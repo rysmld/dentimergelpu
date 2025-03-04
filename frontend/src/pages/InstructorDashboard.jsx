@@ -141,6 +141,27 @@ const Dashboard = () => {
     fetchWeeklyPatients();
   }, []);
 
+  useEffect(() => {
+    const fetchWeeklyCases = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/dashboard/weekly-cases-growth",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        console.log("API Response:", response.data);
+        setWeeklyCases(response.data.weeklyCaseGrowth);
+      } catch (error) {
+        console.error("Error fetching weekly case growth:", error);
+      }
+    };
+
+    fetchWeeklyCases();
+  }, []);
+
   const lineChartData = {
     labels: weeklyGrowth.map((data) => `Week ${data.week}, ${data.year}`),
     datasets: [
